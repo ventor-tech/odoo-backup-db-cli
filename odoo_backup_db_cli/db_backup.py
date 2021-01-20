@@ -48,6 +48,8 @@ def write_config_file(config, path):
     except OSError:
         print_error_file(path)
         return CodeError.ACCESS_ERROR
+    else:
+        return CodeError.SUCCESS
 
 
 def dump_db(config, environment):

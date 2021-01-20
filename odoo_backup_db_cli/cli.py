@@ -5,6 +5,7 @@ import configparser
 import importlib
 import logging
 import os
+import sys
 
 import click
 from yaspin import yaspin
@@ -59,7 +60,7 @@ def generate_common_config(host, port, username, password, path):
     """Generates the common structure of the settings file."""
     if os.path.isfile(path):
         logging.info('The configuration file already exist.')
-        return CodeError.FILE_ALREADY_EXIST
+        return sys.exit(CodeError.FILE_ALREADY_EXIST)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     config = configparser.ConfigParser()
     dir_path = os.path.dirname(path)
@@ -67,14 +68,14 @@ def generate_common_config(host, port, username, password, path):
         os.makedirs(dir_path, exist_ok=True)
     except OSError:
         print_error_dir(dir_path)
-        return CodeError.ACCESS_ERROR
+        return sys.exit(CodeError.ACCESS_ERROR)
     config[DEFAULT_ENVIRONMENT] = {
         'db_host': host,
         'db_port': port,
         'db_username': username,
         'db_password': password,
     }
-    return write_config_file(config, path)
+    return sys.exit(write_config_file(config, path))
 
 
 @main.command()
@@ -184,7 +185,7 @@ def update_config(
     """
     if not os.path.isfile(path):
         logging.info('The configuration file does not exist.')
-        return CodeError.FILE_DOES_NOT_EXIST
+        return sys.exit(CodeError.FILE_DOES_NOT_EXIST)
     config = configparser.ConfigParser()
     config.read(path)
     env = {
@@ -209,7 +210,7 @@ def update_config(
     for key, value in env.items():  # noqa: WPS110
         if value is not None:
             config[environment][key] = str(value)
-    return write_config_file(config, path)
+    return sys.exit(write_config_file(config, path))
 
 
 @main.command()
@@ -225,12 +226,12 @@ def create_backup(environment, path):
     """Creates a backup according to the settings of the selected environment."""
     if not os.path.isfile(path):
         logging.info('The configuration file does not exist.')
-        return CodeError.FILE_DOES_NOT_EXIST
+        return sys.exit(CodeError.FILE_DOES_NOT_EXIST)
     config = configparser.ConfigParser()
     config.read(path)
     error_found = check_config(config, environment)
     if error_found:
-        return error_found
+        return sys.exit(error_found)
     dump_db(config, environment)
     dump_filestore(config, environment)
     type = config[environment].get('type')
