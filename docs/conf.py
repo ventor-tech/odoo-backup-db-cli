@@ -19,6 +19,7 @@ import tomlkit
 
 sys.path.insert(0, os.path.abspath('..'))
 
+# flake8: noqa
 # -- Patching m2r2 -----------------------------------------------------------
 import m2r2
 
