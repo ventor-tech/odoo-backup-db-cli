@@ -238,3 +238,4 @@ def create_backup(environment, path):
     plugin = importlib.import_module('odoo_backup_db_cli.protocols.{type}'.format(type=type))
     type_handler = getattr(plugin, '_{type}_handler'.format(type=type))
     type_handler(config, environment)
+    return sys.exit(CodeError.SUCCESS)
