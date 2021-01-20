@@ -179,9 +179,9 @@ def update_config(
         path,
 ):
     """
-    Adding or updating the enviroment of the settings file.
+    Adding or updating the environment of the settings file.
 
-    ATTENTION: will overwrite the enviroment if it exist.
+    ATTENTION: will overwrite the environment if it exist.
     """
     if not os.path.isfile(path):
         logging.info('The configuration file does not exist.')
