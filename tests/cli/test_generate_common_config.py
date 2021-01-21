@@ -52,7 +52,9 @@ def test_check_exist_config():
 
 def test_check_access_dir():
     runner = CliRunner()
-    path = '{0}/test_generate_common_config/test/test_check_access.conf'.format(tempfile.gettempdir())
+    path = '{0}/test_generate_common_config/test/test_check_access_dir.conf'.format(
+        tempfile.gettempdir()
+    )
     dir_path = '{0}/test_generate_common_config/'.format(tempfile.gettempdir())
     os.makedirs(dir_path, exist_ok=True)
     os.chmod(dir_path, 0o555)
@@ -64,9 +66,12 @@ def test_check_access_dir():
         pass
     assert res.exit_code == CodeError.ACCESS_DIR_ERROR
 
+
 def test_check_access_file():
     runner = CliRunner()
-    path = '{0}/test_generate_common_config/test_check_access.conf'.format(tempfile.gettempdir())
+    path = '{0}/test_generate_common_config/test_check_access_file.conf'.format(
+        tempfile.gettempdir()
+    )
     dir_path = '{0}/test_generate_common_config/'.format(tempfile.gettempdir())
     os.makedirs(dir_path, exist_ok=True)
     os.chmod(dir_path, 0o555)
