@@ -78,8 +78,8 @@ def check_config(config, environment):  # noqa: C901, WPS212, WPS210, WPS213, WP
         set(config[DEFAULT_ENVIRONMENT].keys())
     )
     db_fields = {'db_port', 'db_username', 'db_password', 'db_host', 'db_name'}
-    if not db_fields.intersection(all_config_fields):
-        logging.info('The creditials for the database is not fully configured.')
+    if not db_fields.issubset(all_config_fields):
+        logging.info('The creditials of the database is not fully configured.')
         return CodeError.NO_SETTINGS
     type = config[environment].get('type')
     if type not in TYPES:
