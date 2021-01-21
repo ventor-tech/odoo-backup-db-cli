@@ -99,9 +99,11 @@ def generate_common_config(host, port, username, password, path):
     default=TYPES[0],
     help='The method by which the backup will be saved.',
 )
-@click.option('--host',
-              '-H',
-              help='The server IP to which you want to save backups.')
+@click.option(
+    '--host',
+    '-H',
+    help='The server IP to which you want to save backups.',
+)
 @click.option(
     '--port',
     '-r',
