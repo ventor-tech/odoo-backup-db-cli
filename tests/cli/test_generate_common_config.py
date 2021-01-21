@@ -3,7 +3,6 @@
 import configparser
 import os
 import tempfile
-import shutil
 
 from click.testing import CliRunner
 from odoo_backup_db_cli.cli import DEFAULT_ENVIRONMENT, main
