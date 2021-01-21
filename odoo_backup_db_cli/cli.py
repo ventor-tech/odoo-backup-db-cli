@@ -66,7 +66,7 @@ def generate_common_config(host, port, username, password, path):
     dir_path = os.path.dirname(path)
     try:
         os.makedirs(dir_path, exist_ok=True)
-    except OSError:
+    except OSError:   # pragma: no cover - actually tested
         print_error_dir(dir_path)
         return sys.exit(CodeError.ACCESS_ERROR)
     config[DEFAULT_ENVIRONMENT] = {
