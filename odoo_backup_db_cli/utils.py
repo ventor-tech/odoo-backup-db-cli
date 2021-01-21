@@ -8,8 +8,9 @@ class CodeError(IntEnum):
     """List of possible program crashes."""
 
     SUCCESS = 0
-    ACCESS_ERROR = 1
-    FILE_ALREADY_EXIST = 2
-    FILE_DOES_NOT_EXIST = 3
-    NO_SETTINGS = 4
-    INVALID_SETTINGS = 5
+    ACCESS_DIR_ERROR = 1
+    ACCESS_FILE_ERROR = 2
+    FILE_ALREADY_EXIST = 3
+    FILE_DOES_NOT_EXIST = 4
+    NO_SETTINGS = 5
+    INVALID_SETTINGS = 6

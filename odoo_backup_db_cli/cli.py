@@ -68,7 +68,7 @@ def generate_common_config(host, port, username, password, path):
         os.makedirs(dir_path, exist_ok=True)
     except OSError:   # pragma: no cover - actually tested
         print_error_dir(dir_path)
-        return sys.exit(CodeError.ACCESS_ERROR)
+        return sys.exit(CodeError.ACCESS_DIR_ERROR)
     config[DEFAULT_ENVIRONMENT] = {
         'db_host': host,
         'db_port': port,

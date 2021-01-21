@@ -47,7 +47,7 @@ def write_config_file(config, path):
             config.write(configfile)
     except OSError:
         print_error_file(path)
-        return CodeError.ACCESS_ERROR
+        return CodeError.ACCESS_FILE_ERROR
     else:
         return CodeError.SUCCESS
 
