@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
+# Stdlib:
 import configparser
 import importlib
 import logging
 import os
 import sys
 
+# Thirdparty:
 import click
+from odoo_backup_db_cli.db_backup import dump_db, dump_filestore
+from odoo_backup_db_cli.utils import CodeError, check_config, print_error_dir, write_config_file
 from yaspin import yaspin
-
-from odoo_backup_db_cli.db_backup import (
-    check_config,
-    dump_db,
-    dump_filestore,
-    print_error_dir,
-    write_config_file,
-)
-from odoo_backup_db_cli.utils import CodeError
 
 DEFAULT_CONF_PATH = '/etc/odoo/odoo_backup.conf'
 DEFAULT_FILESTORE_PATH = '/opt/odoo/.local/share/Odoo/filestore/'
@@ -37,19 +32,10 @@ def main():
 
 
 @main.command()
-@click.option('--host',
-              '-h',
-              default='localhost',
-              help='The server that hosts the database.')
-@click.option('--port',
-              '-p',
-              default='5432',
-              help='The port on which to connect to the database.')
+@click.option('--host', '-h', default='localhost', help='The server that hosts the database.')
+@click.option('--port', '-p', default='5432', help='The port on which to connect to the database.')
 @click.option('--username', '-u', default='odoo', help='Database username.')
-@click.option('--password',
-              '-w',
-              default='odoo',
-              help='Database user password.')
+@click.option('--password', '-w', default='odoo', help='Database user password.')
 @click.option(
     '--path',
     '-P',
@@ -66,7 +52,7 @@ def generate_common_config(host, port, username, password, path):
     dir_path = os.path.dirname(path)
     try:
         os.makedirs(dir_path, exist_ok=True)
-    except OSError:   # pragma: no cover - actually tested
+    except OSError:  # pragma: no cover - actually tested
         print_error_dir(dir_path)
         return sys.exit(CodeError.ACCESS_DIR_ERROR)
     config[DEFAULT_ENVIRONMENT] = {
@@ -83,13 +69,13 @@ def generate_common_config(host, port, username, password, path):
     '--environment',
     '-e',
     required=True,
-    help=('Name for the settings section, settings sections'
-          ' are used for different options for saving the database.'),
+    help=(
+        'Name for the settings section, settings sections'
+        ' are used for different options for saving the database.'
+    ),
 )
 @click.option('--db-host', '-h', help='The server that hosts the database.')
-@click.option('--db-port',
-              '-p',
-              help='The port on which to connect to the database.')
+@click.option('--db-port', '-p', help='The port on which to connect to the database.')
 @click.option('--db-username', '-u', help='Database username.')
 @click.option('--db-password', '-w', help='Database user password.')
 @click.option(
@@ -111,9 +97,7 @@ def generate_common_config(host, port, username, password, path):
     help='The server port to which you want to save backups.',
 )
 @click.option('--pasv', '-s', default=False, help='FTP conection mode.')
-@click.option('--username',
-              '-U',
-              help='The server user to which you want to save backups.')
+@click.option('--username', '-U', help='The server user to which you want to save backups.')
 @click.option(
     '--password',
     '-W',
@@ -161,24 +145,24 @@ def generate_common_config(host, port, username, password, path):
     help='Path where to put the settings file.',
 )
 def update_config(
-        environment,
-        db_host,
-        db_port,
-        db_username,
-        db_password,
-        type,
-        host,
-        port,
-        pasv,
-        username,
-        password,
-        private_key,
-        backup_location,
-        clean_backup_after,
-        db_name,
-        with_filestore,
-        filestore_location,
-        path,
+    environment,
+    db_host,
+    db_port,
+    db_username,
+    db_password,
+    type,
+    host,
+    port,
+    pasv,
+    username,
+    password,
+    private_key,
+    backup_location,
+    clean_backup_after,
+    db_name,
+    with_filestore,
+    filestore_location,
+    path,
 ):
     """
     Adding or updating the environment of the settings file.

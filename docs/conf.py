@@ -12,16 +12,18 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+# Stdlib:
 import os
 import sys
 
+# Thirdparty:
+import m2r2
 import tomlkit
 
 sys.path.insert(0, os.path.abspath('..'))
 
 # flake8: noqa
 # -- Patching m2r2 -----------------------------------------------------------
-import m2r2
 
 current_m2r2_setup = m2r2.setup
 
