@@ -70,6 +70,9 @@ def check_config(config, environment):  # noqa: C901, WPS212, WPS210, WPS213, WP
     if clean_backup_after is None:
         logging.info('The settings do not indicate after how many days to delete.')
         return CodeError.NO_SETTINGS
+    elif not clean_backup_after.isdecimal():
+        logging.info('The clean_backup_after parameter should be digit.')
+        return CodeError.INVALID_SETTINGS
     if config[environment].get('with_filestore') not in ('False', '0', None):
         filestore_location = config[environment].get('filestore_location')
         if filestore_location is None:

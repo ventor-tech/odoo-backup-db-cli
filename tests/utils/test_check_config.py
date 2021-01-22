@@ -57,6 +57,13 @@ def test_clean_backup_after():
     assert res == CodeError.NO_SETTINGS
 
 
+def test_clean_backup_after_is_integer():
+    config = get_test_config()
+    config['test']['clean_backup_after'] = "1.1"
+    res = check_config(config, 'test')
+    assert res == CodeError.INVALID_SETTINGS
+
+
 def test_with_filestore():
     config = get_test_config()
     del config['test']['with_filestore']
