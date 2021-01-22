@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 # Thirdparty:
-from odoo_backup_db_cli.utils import DEFAULT_ENVIRONMENT
+from odoo_backup_db_cli.utils import DEFAULT_ENVIRONMENT, CodeError
 
 
 def dump_db(config, environment):
@@ -36,6 +36,7 @@ def dump_db(config, environment):
     )
     subprocess.call(script, shell=True)
     os.remove('{0}/.pgpass'.format(temp_dir))
+    return CodeError.SUCCESS
 
 
 def dump_filestore(config, environment):
@@ -46,3 +47,4 @@ def dump_filestore(config, environment):
             config[environment].get('db_name'),
         )
         shutil.make_archive('{0}/filestore'.format(tempfile.gettempdir()), 'zip', filestore)
+    return CodeError.SUCCESS
