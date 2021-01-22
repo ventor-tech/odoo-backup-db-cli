@@ -38,11 +38,15 @@ def _sftp_save_filestore(config, environment, sftp, subfolder):
     return CodeError.SUCCESS
 
 
-def _sftp_delete_old_backups(config, environment, sftp):
+def _sftp_delete_old_backups(config, environment, sftp):  # noqa: C901, WPS231
     days = int(config[environment].get('clean_backup_after'))
     if days:
         for folder in sftp.listdir():
-            if datetime.strptime(folder, FORMAT_TIME) + timedelta(days) < datetime.now():
+            try:
+                correct_folder = datetime.strptime(folder, FORMAT_TIME)
+            except ValueError:
+                continue
+            if correct_folder + timedelta(days) < datetime.now():
                 for sftp_file in sftp.listdir(folder):
                     previous_folder = sftp.pwd
                     sftp.cwd(folder)
