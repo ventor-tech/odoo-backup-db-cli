@@ -9,14 +9,14 @@ import tempfile
 # Thirdparty:
 from click.testing import CliRunner
 from mock import patch
-from odoo_backup_db_cli.cli import DEFAULT_ENVIRONMENT, main
+from odoo_backup_db_cli.cli import DEFAULT_ENVIRONMENT, importlib, main
 from odoo_backup_db_cli.utils import CodeError
 
 
-@patch('odoo_backup_db_cli.cli.importlib')
+@patch.object(importlib, 'import_module')
 @patch('odoo_backup_db_cli.cli.dump_filestore')
 @patch('odoo_backup_db_cli.cli.dump_db')
-def test_ok(dump_db_mock, dump_filestore_mock, type_handler_mock):
+def test_ok(dump_db_mock, dump_filestore_mock, import_module_mock):
     runner = CliRunner()
     path = '{0}/test_create_backup/test_ok.conf'.format(tempfile.gettempdir())
     config = configparser.ConfigParser()
@@ -44,6 +44,8 @@ def test_ok(dump_db_mock, dump_filestore_mock, type_handler_mock):
         config.write(configfile)
     res = runner.invoke(main, ('create-backup', 'test', '--path', path), None, None, False)
     dump_db_mock.assert_called_once()
+    dump_filestore_mock.assert_called_once()
+    import_module_mock.assert_called_once()
     os.remove(path)
     try:
         os.rmdir(path)
