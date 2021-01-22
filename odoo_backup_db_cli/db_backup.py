@@ -7,7 +7,8 @@ import shutil
 import subprocess
 import tempfile
 
-DEFAULT_ENVIRONMENT = 'common'
+# Thirdparty:
+from odoo_backup_db_cli.utils import DEFAULT_ENVIRONMENT
 
 
 def dump_db(config, environment):

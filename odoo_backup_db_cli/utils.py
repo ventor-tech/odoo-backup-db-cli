@@ -6,9 +6,10 @@ import logging
 from enum import IntEnum
 from pathlib import Path
 
-# Thirdparty:
-from odoo_backup_db_cli.db_backup import DEFAULT_ENVIRONMENT
-
+DEFAULT_CONF_PATH = '/etc/odoo/odoo_backup.conf'
+DEFAULT_FILESTORE_PATH = '/opt/odoo/.local/share/Odoo/filestore/'
+DEFAULT_BACKUPS_PATH = '/var/opt/odoo/backups'
+DEFAULT_ENVIRONMENT = 'common'
 TYPES = ('local', 'ftp', 'sftp')
 
 

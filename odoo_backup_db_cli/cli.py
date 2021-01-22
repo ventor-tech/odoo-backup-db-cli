@@ -11,14 +11,18 @@ import sys
 # Thirdparty:
 import click
 from odoo_backup_db_cli.db_backup import dump_db, dump_filestore
-from odoo_backup_db_cli.utils import CodeError, check_config, print_error_dir, write_config_file
+from odoo_backup_db_cli.utils import (  # noqa: WPS235
+    DEFAULT_BACKUPS_PATH,
+    DEFAULT_CONF_PATH,
+    DEFAULT_ENVIRONMENT,
+    DEFAULT_FILESTORE_PATH,
+    TYPES,
+    CodeError,
+    check_config,
+    print_error_dir,
+    write_config_file,
+)
 from yaspin import yaspin
-
-DEFAULT_CONF_PATH = '/etc/odoo/odoo_backup.conf'
-DEFAULT_FILESTORE_PATH = '/opt/odoo/.local/share/Odoo/filestore/'
-DEFAULT_BACKUPS_PATH = '/var/opt/odoo/backups'
-DEFAULT_ENVIRONMENT = 'common'
-TYPES = ('local', 'ftp', 'sftp')
 
 
 @click.group()
