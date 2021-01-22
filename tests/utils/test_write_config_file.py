@@ -13,7 +13,7 @@ from odoo_backup_db_cli.utils import CodeError, write_config_file
 def test_ok():
     path = '{0}/test_write_config_file/test_ok.conf'.format(tempfile.gettempdir())
     config = configparser.ConfigParser()
-    config["common"] = {
+    config['common'] = {
         'db_host': '0.0.0.0',
         'db_port': '5434',
         'db_username': 'odoo2',
@@ -35,7 +35,7 @@ def test_check_access_file():
     os.makedirs(dir_path, exist_ok=True)
     os.chmod(dir_path, 0o555)
     config = configparser.ConfigParser()
-    config["common"] = {
+    config['common'] = {
         'db_host': '0.0.0.0',
         'db_port': '5434',
         'db_username': 'odoo2',

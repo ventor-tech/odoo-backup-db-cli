@@ -20,7 +20,7 @@ def test_ok(dump_db_mock, dump_filestore_mock, import_module_mock):
     runner = CliRunner()
     path = '{0}/test_create_backup/test_ok.conf'.format(tempfile.gettempdir())
     config = configparser.ConfigParser()
-    config["common"] = {}
+    config['common'] = {}
     config['test'] = {
         'db_host': '0.0.0.0',
         'db_port': '5434',
