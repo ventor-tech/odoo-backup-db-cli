@@ -7,6 +7,9 @@ import os
 import tempfile
 from datetime import datetime, timedelta
 
+# Thirdparty:
+from odoo_backup_db_cli.utils import CodeError
+
 FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
@@ -19,6 +22,7 @@ def _ftp_mk_dirs(current_dir, ftp):
             ftp.mkd(current_dir)
             ftp.sendcmd('SITE CHMOD 755 {0}'.format(current_dir))
             ftp.cwd(current_dir)
+    return CodeError.SUCCESS
 
 
 def _ftp_save_db(config, environment, ftp, subfolder):
@@ -31,6 +35,7 @@ def _ftp_save_db(config, environment, ftp, subfolder):
         ftp.storbinary('STOR dump.sql', dump)
     os.remove('{0}/dump.sql'.format(tempfile.gettempdir()))
     ftp.cwd(previous_folder)
+    return CodeError.SUCCESS
 
 
 def _ftp_save_filestore(config, environment, ftp, subfolder):
@@ -41,6 +46,7 @@ def _ftp_save_filestore(config, environment, ftp, subfolder):
             ftp.storbinary('STOR filestore.zip', filestore)
         os.remove('{0}/filestore.zip'.format(tempfile.gettempdir()))
         ftp.cwd(previous_folder)
+    return CodeError.SUCCESS
 
 
 def _ftp_delete_old_backups(config, environment, ftp):
@@ -51,6 +57,7 @@ def _ftp_delete_old_backups(config, environment, ftp):
                 for ftp_file in list(ftp.nlst(folder)):
                     ftp.delete(ftp_file)
                 ftp.rmd(folder)
+    return CodeError.SUCCESS
 
 
 def _ftp_handler(config, environment):
@@ -64,3 +71,4 @@ def _ftp_handler(config, environment):
     _ftp_save_filestore(config, environment, ftp, subfolder)
     _ftp_delete_old_backups(config, environment, ftp)
     ftp.quit()
+    return CodeError.SUCCESS

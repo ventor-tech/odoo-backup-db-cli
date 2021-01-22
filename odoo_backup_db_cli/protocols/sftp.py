@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 # Thirdparty:
 import pysftp
+from odoo_backup_db_cli.utils import CodeError
 
 FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
@@ -24,6 +25,7 @@ def _sftp_save_db(config, environment, sftp, subfolder):
     sftp.put('{0}/dump.sql'.format(tempfile.gettempdir()))
     os.remove('{0}/dump.sql'.format(tempfile.gettempdir()))
     sftp.cwd(previous_folder)
+    return CodeError.SUCCESS
 
 
 def _sftp_save_filestore(config, environment, sftp, subfolder):
@@ -33,6 +35,7 @@ def _sftp_save_filestore(config, environment, sftp, subfolder):
         sftp.put('{0}/filestore.zip'.format(tempfile.gettempdir()))
         os.remove('{0}/filestore.zip'.format(tempfile.gettempdir()))
         sftp.cwd(previous_folder)
+    return CodeError.SUCCESS
 
 
 def _sftp_delete_old_backups(config, environment, sftp):
@@ -46,6 +49,7 @@ def _sftp_delete_old_backups(config, environment, sftp):
                     sftp.remove(sftp_file)
                     sftp.cwd(previous_folder)
                 sftp.rmdir(folder)
+    return CodeError.SUCCESS
 
 
 def _sftp_handler(config, environment):
@@ -60,3 +64,4 @@ def _sftp_handler(config, environment):
         _sftp_save_db(config, environment, sftp, subfolder)
         _sftp_save_filestore(config, environment, sftp, subfolder)
         _sftp_delete_old_backups(config, environment, sftp)
+    return CodeError.SUCCESS
