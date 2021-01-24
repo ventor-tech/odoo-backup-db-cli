@@ -44,7 +44,7 @@ def _local_delete_old_backups(config, environment):  # noqa: C901, WPS231
     return CodeError.SUCCESS
 
 
-def _local_handler(config, environment):  # pragma: no cover - just handler
+def _local_handler(config, environment):
     subfolder = datetime.now().strftime(FORMAT_TIME)
     _local_save_db(config, environment, subfolder)
     _local_save_filestore(config, environment, subfolder)
