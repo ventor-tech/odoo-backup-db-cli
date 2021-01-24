@@ -33,15 +33,14 @@ def _local_save_filestore(config, environment, subfolder):
 
 def _local_delete_old_backups(config, environment):  # noqa: C901, WPS231
     days = int(config[environment].get('clean_backup_after'))
-    if days:
-        for root, dirs, _ in os.walk(config[environment].get('backup_location')):
-            for dir in dirs:
-                try:
-                    correct_dir = datetime.strptime(dir, FORMAT_TIME)
-                except ValueError:
-                    continue
-                if correct_dir + timedelta(days) < datetime.now():
-                    shutil.rmtree(os.path.abspath(os.path.join(root, dir)))
+    for root, dirs, _ in os.walk(config[environment].get('backup_location')):
+        for dir in dirs:  # pragma: no cover - actually tested
+            try:
+                correct_dir = datetime.strptime(dir, FORMAT_TIME)
+            except ValueError:
+                continue
+            if correct_dir + timedelta(days) < datetime.now():
+                shutil.rmtree(os.path.abspath(os.path.join(root, dir)))
     return CodeError.SUCCESS
 
 

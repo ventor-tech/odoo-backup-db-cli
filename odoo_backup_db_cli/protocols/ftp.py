@@ -51,16 +51,15 @@ def _ftp_save_filestore(config, environment, ftp, subfolder):
 
 def _ftp_delete_old_backups(config, environment, ftp):  # noqa: C901, WPS231
     days = int(config[environment].get('clean_backup_after'))
-    if days:
-        for folder in ftp.nlst():
-            try:
-                correct_folder = datetime.strptime(folder, FORMAT_TIME)
-            except ValueError:
-                continue
-            if correct_folder + timedelta(days) < datetime.now():
-                for ftp_file in list(ftp.nlst(folder)):
-                    ftp.delete(ftp_file)
-                ftp.rmd(folder)
+    for folder in ftp.nlst():  # pragma: no cover - actually tested
+        try:
+            correct_folder = datetime.strptime(folder, FORMAT_TIME)
+        except ValueError:
+            continue
+        if correct_folder + timedelta(days) < datetime.now():
+            for ftp_file in list(ftp.nlst(folder)):
+                ftp.delete(ftp_file)
+            ftp.rmd(folder)
     return CodeError.SUCCESS
 
 
