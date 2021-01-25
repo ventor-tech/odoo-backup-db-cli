@@ -10,7 +10,7 @@ style = "https://raw.githubusercontent.com/wemake-services/wemake-python-stylegu
 [tool.poetry]
 name = "odoo-backup-db-cli"
 description = "Tool to create full backup of odoo database"
-version = "0.1.0"
+version = "1.0.0"
 license = "AGPL3"
 
 authors = [
