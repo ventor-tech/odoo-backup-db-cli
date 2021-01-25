@@ -36,7 +36,7 @@ def test_delete():
     }
     res = _local_delete_old_backups(config, 'test')
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     assert res == CodeError.SUCCESS
@@ -67,8 +67,8 @@ def test_try_delete_incorrect():
     }
     res = _local_delete_old_backups(config, 'test')
     try:
-        os.rmdir(path + test_folder)
-        os.rmdir(path)
+        os.rmdir(os.path.join(path, test_folder))
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     assert res == CodeError.SUCCESS
@@ -98,7 +98,7 @@ def test_not_delete():
     }
     res = _local_delete_old_backups(config, 'test')
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     assert res == CodeError.SUCCESS

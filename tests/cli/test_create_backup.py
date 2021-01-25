@@ -48,7 +48,7 @@ def test_ok(dump_db_mock, dump_filestore_mock, import_module_mock):
     import_module_mock.assert_called_once()
     os.remove(path)
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     assert res.exit_code == CodeError.SUCCESS
@@ -75,4 +75,9 @@ def test_error_found():
     with open(path, 'w') as configfile:
         config.write(configfile)
     res = runner.invoke(main, ('create-backup', 'test', '--path', path), catch_exceptions=True)
+    os.remove(path)
+    try:
+        os.rmdir(os.path.dirname(path))
+    except OSError:
+        pass
     assert res.exit_code == CodeError.NO_SETTINGS

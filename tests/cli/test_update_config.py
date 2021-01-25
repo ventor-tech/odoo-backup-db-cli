@@ -65,7 +65,7 @@ def test_ok():
     config.read(path)
     os.remove(path)
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     expected_config_common = {

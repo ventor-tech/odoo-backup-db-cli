@@ -23,7 +23,7 @@ def test_ok():
     res = write_config_file(config, path)
     os.remove(path)
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     assert res == CodeError.SUCCESS

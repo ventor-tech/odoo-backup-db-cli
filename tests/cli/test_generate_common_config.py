@@ -20,7 +20,7 @@ def test_ok():
     config.read(path)
     os.remove(path)
     try:
-        os.rmdir(path)
+        os.rmdir(os.path.dirname(path))
     except OSError:
         pass
     expected_config = {
@@ -49,6 +49,11 @@ def test_check_exist_config():
     with open(path, 'w') as configfile:
         config.write(configfile)
     res = runner.invoke(main, ('generate-common-config', '--path', path))
+    os.remove(path)
+    try:
+        os.rmdir(os.path.dirname(path))
+    except OSError:
+        pass
     assert res.exit_code == CodeError.FILE_ALREADY_EXIST
 
 
