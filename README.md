@@ -1,6 +1,6 @@
 # odoo-backup-db-cli
 
-[![Build Status](https://github.com/ventor-tech/odoo-backup-db-cli/workflows/test/badge.svg?branch=master&event=push)](https://github.com/ventor-tech/odoo-backup-db-cli/actions?query=workflow%3Atest)
+[![Build Status](https://github.com/ventor-tech/odoo-backup-db-cli/workflows/test/badge.svg?branch=main&event=push)](https://github.com/ventor-tech/odoo-backup-db-cli/actions?query=workflow%3Atest)
 [![Python Version](https://img.shields.io/pypi/pyversions/odoo-backup-db-cli.svg)](https://pypi.org/project/odoo-backup-db-cli/)
 [![Documentation Status](https://readthedocs.org/projects/odoo-backup-db-cli/badge/?version=latest)](https://odoo-backup-db-cli.readthedocs.io/en/latest/?badge=latest)
 [![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
