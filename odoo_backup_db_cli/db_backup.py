@@ -28,7 +28,7 @@ def dump_db(config, environment):
             'chmod 0600 {0}/.pgpass\n'.format(temp_dir),
             'PGPASSFILE={0}/.pgpass\n'.format(temp_dir),
             'export PGPASSFILE\n',
-            'pg_dump -U {1} -h {3} -p {4} {5} > {0}/dump.sql\n'.format(
+            'pg_dump -U {1} -h {3} -p {4} {5} | gzip > {0}/dump.sql.gz\n'.format(
                 temp_dir,
                 *db_config,
             ),

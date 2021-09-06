@@ -4,74 +4,72 @@
 # Stdlib:
 import ftplib  # noqa: S402
 import os
-import tempfile
-from datetime import datetime, timedelta
 
 # Thirdparty:
-from odoo_backup_db_cli.utils import CodeError
-
-FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
+from odoo_backup_db_cli.protocols.common import RemoteBackupHandler, FSBackupHandler
 
 
-def _ftp_mk_dirs(current_dir, ftp):
-    if current_dir != '':
-        try:
-            ftp.cwd(current_dir)
-        except ftplib.Error:
-            _ftp_mk_dirs('/'.join(current_dir.split('/')[:-1]), ftp)
-            ftp.mkd(current_dir)
-            ftp.sendcmd('SITE CHMOD 755 {0}'.format(current_dir))
-            ftp.cwd(current_dir)
-    return CodeError.SUCCESS
+class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
 
+    def _get_required_settings(self):
+        res = super(FtpBackupHandler, self)._get_required_settings()
+        res.append(
+            (
+                ('username', 'password', 'host', 'port', 'pasv'),
+                'The creditials for the ftp server is not fully configured.'
+            )
+        )
+        return res
 
-def _ftp_save_db(config, environment, ftp, subfolder):
-    _ftp_mk_dirs(config[environment].get('backup_location'), ftp)
-    if subfolder not in ftp.nlst():
-        ftp.mkd(subfolder)
-    previous_folder = ftp.pwd()
-    ftp.cwd(subfolder)
-    with open('{0}/dump.sql'.format(tempfile.gettempdir()), 'rb') as dump:
-        ftp.storbinary('STOR dump.sql', dump)
-    os.remove('{0}/dump.sql'.format(tempfile.gettempdir()))
-    ftp.cwd(previous_folder)
-    return CodeError.SUCCESS
+    def _connect(self):
+        self.ftp = ftplib.FTP()  # noqa: S321
+        self.ftp.connect(
+            self.env.get('host'),
+            int(self.env.get('port'))
+        )
+        self.ftp.login(
+            self.env.get('username'),
+            self.env.get('password')
+        )
+        pasv = False if self.env.get('pasv') in ('False', '0', None) else True
+        self.ftp.set_pasv(pasv)
 
+    def _disconnect(self):
+        self.ftp.quit()
 
-def _ftp_save_filestore(config, environment, ftp, subfolder):
-    if config[environment].get('with_filestore') not in ('False', '0', None):
+    def _ftp_mk_dirs(self, current_dir):
+        if current_dir != '':
+            try:
+                self.ftp.cwd(current_dir)
+            except ftplib.Error:
+                self._ftp_mk_dirs('/'.join(current_dir.split('/')[:-1]))
+                self.ftp.mkd(current_dir)
+                self.ftp.sendcmd('SITE CHMOD 755 {0}'.format(current_dir))
+                self.ftp.cwd(current_dir)
+
+    def _save_db(self):
+        self._ftp_mk_dirs(self.backup_location)
+        if subfolder not in self.ftp.nlst():
+            self.ftp.mkd(subfolder)
         previous_folder = ftp.pwd()
-        ftp.cwd(subfolder)
-        with open('{0}/filestore.zip'.format(tempfile.gettempdir()), 'rb') as filestore:
-            ftp.storbinary('STOR filestore.zip', filestore)
-        os.remove('{0}/filestore.zip'.format(tempfile.gettempdir()))
-        ftp.cwd(previous_folder)
-    return CodeError.SUCCESS
+        self.ftp.cwd(subfolder)
+        with open(self.tmp_dump, 'rb') as dump:
+            self.ftp.storbinary('STOR dump.sql.gz', dump)
+        os.remove(self.tmp_dump)
+        self.ftp.cwd(previous_folder)
 
+    def _save_filestore(self):
+        if self.with_filestore:
+            previous_folder = ftp.pwd()
+            self.ftp.cwd(self.subfolder)
+            with open(tmp_zip, 'rb') as filestore:
+                self.ftp.storbinary('STOR filestore.zip', filestore)
+            os.remove(tmp_zip)
+            self.ftp.cwd(previous_folder)
 
-def _ftp_delete_old_backups(config, environment, ftp):  # noqa: C901, WPS231
-    days = int(config[environment].get('clean_backup_after'))
-    for folder in ftp.nlst():  # pragma: no cover - actually tested
-        try:
-            correct_folder = datetime.strptime(folder, FORMAT_TIME)
-        except ValueError:
-            continue
-        if correct_folder + timedelta(days) < datetime.now():
-            for ftp_file in list(ftp.nlst(folder)):
-                ftp.delete(ftp_file)
-            ftp.rmd(folder)
-    return CodeError.SUCCESS
-
-
-def _ftp_handler(config, environment):
-    ftp = ftplib.FTP()  # noqa: S321
-    ftp.connect(config[environment].get('host'), int(config[environment].get('port')))
-    ftp.login(config[environment].get('username'), config[environment].get('password'))
-    pasv = False if config[environment].get('pasv') in ('False', '0', None) else True
-    ftp.set_pasv(pasv)
-    subfolder = datetime.now().strftime(FORMAT_TIME)
-    _ftp_save_db(config, environment, ftp, subfolder)
-    _ftp_save_filestore(config, environment, ftp, subfolder)
-    _ftp_delete_old_backups(config, environment, ftp)
-    ftp.quit()
-    return CodeError.SUCCESS
+    def _delete_old_backups(config, environment, ftp):  # noqa: C901, WPS231
+        for folder in ftp.nlst():  # pragma: no cover - actually tested
+            if self._is_folder_to_remove(folder):
+                for ftp_file in list(self.ftp.nlst(folder)):
+                    self.ftp.delete(ftp_file)
+                self.ftp.rmd(folder)

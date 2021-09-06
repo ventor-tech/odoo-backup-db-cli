@@ -4,67 +4,68 @@
 
 # Stdlib:
 import os
-import tempfile
-from datetime import datetime, timedelta
 
 # Thirdparty:
 import pysftp
-from odoo_backup_db_cli.utils import CodeError
-
-FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
+from odoo_backup_db_cli.protocols.common import RemoteBackupHandler, FSBackupHandler
 
 
-def _sftp_save_db(config, environment, sftp, subfolder):
-    mode = 755
-    sftp.makedirs(config[environment].get('backup_location'), mode)
-    sftp.cwd(config[environment].get('backup_location'))
-    previous_folder = sftp.pwd
-    if subfolder not in sftp.listdir():
-        sftp.mkdir(subfolder, mode=mode)
-    sftp.cwd(subfolder)
-    sftp.put('{0}/dump.sql'.format(tempfile.gettempdir()))
-    os.remove('{0}/dump.sql'.format(tempfile.gettempdir()))
-    sftp.cwd(previous_folder)
-    return CodeError.SUCCESS
+class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
 
+    def _get_required_settings(self):
+        res = super(SftpBackupHandler, self)._get_required_settings()
+        res.append(
+            (
+                ('username', 'host', 'port', 'pasv'),
+                'The creditials for the sftp server is not fully configured.'
+            )
+        )
+        return res
 
-def _sftp_save_filestore(config, environment, sftp, subfolder):
-    if config[environment].get('with_filestore') not in ('False', '0', None):
+    def check_config(self):
+        super(SftpBackupHandler, self).check_config()
+        if self.env.get('private_key') and self.env.get('password'):
+            raise Exception('Only one of (private_key, password) '
+                            'must be present in settings environment.')
+
+    def _connect(self):
+        self.sftp = pysftp.Connection(
+            self.env.get('host'),
+            port=int(self.env.get('port')),
+            username=self.env.get('username'),
+            password=self.env.get('password'),
+            private_key=self.env.get('private_key'),
+        )
+
+    def _disconnect(self):
+        self.sftp.close()
+
+    def _save_db(self):
+        mode = 755
+        sftp.makedirs(self.backup_location, mode)
+        sftp.cwd(self.backup_location)
         previous_folder = sftp.pwd
-        sftp.cwd(subfolder)
-        sftp.put('{0}/filestore.zip'.format(tempfile.gettempdir()))
-        os.remove('{0}/filestore.zip'.format(tempfile.gettempdir()))
+        if self.subfolder not in sftp.listdir():
+            sftp.mkdir(self.subfolder, mode=mode)
+        sftp.cwd(self.subfolder)
+        sftp.put(self.tmp_dump)
+        os.remove(self.tmp_dump)
         sftp.cwd(previous_folder)
-    return CodeError.SUCCESS
 
+    def _save_filestore(self):
+        if self.with_filestore:
+            previous_folder = sftp.pwd
+            sftp.cwd(self.subfolder)
+            sftp.put(tmp_zip)
+            os.remove(tmp_zip)
+            sftp.cwd(previous_folder)
 
-def _sftp_delete_old_backups(config, environment, sftp):  # noqa: C901, WPS231
-    days = int(config[environment].get('clean_backup_after'))
-    for folder in sftp.listdir():  # pragma: no cover - actually tested
-        try:
-            correct_folder = datetime.strptime(folder, FORMAT_TIME)
-        except ValueError:
-            continue
-        if correct_folder + timedelta(days) < datetime.now():
-            for sftp_file in sftp.listdir(folder):
-                previous_folder = sftp.pwd
-                sftp.cwd(folder)
-                sftp.remove(sftp_file)
-                sftp.cwd(previous_folder)
-            sftp.rmdir(folder)
-    return CodeError.SUCCESS
-
-
-def _sftp_handler(config, environment):
-    with pysftp.Connection(
-        config[environment].get('host'),
-        port=int(config[environment].get('port')),
-        username=config[environment].get('username'),
-        password=config[environment].get('password'),
-        private_key=config[environment].get('private_key'),
-    ) as sftp:
-        subfolder = datetime.now().strftime(FORMAT_TIME)
-        _sftp_save_db(config, environment, sftp, subfolder)
-        _sftp_save_filestore(config, environment, sftp, subfolder)
-        _sftp_delete_old_backups(config, environment, sftp)
-    return CodeError.SUCCESS
+    def _delete_old_backups(self):  # noqa: C901, WPS231
+        for folder in sftp.listdir():  # pragma: no cover - actually tested
+            if self._is_folder_to_remove(folder):
+                for sftp_file in sftp.listdir(folder):
+                    previous_folder = sftp.pwd
+                    sftp.cwd(folder)
+                    sftp.remove(sftp_file)
+                    sftp.cwd(previous_folder)
+                sftp.rmdir(folder)
