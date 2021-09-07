@@ -9,15 +9,21 @@ Tool to create full backup of odoo database and filestore
 
 **Table of contents**
 
+.. contents::
+   :local:
+
+
 ## Features
 - Support local backup, ftp/sftp protocols and AWS S3
 - Fully typed with annotations and checked with mypy, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
+
 
 ## Installation
 
 ```bash
 pip install odoo-backup-db-cli
 ```
+
 
 ## Configuration
 
@@ -129,9 +135,11 @@ And that's it.
 
 You may want to check from time to time that the snippet in `~/.bashrc_conda` is up to date in case conda updates its snippet in `~/.bashrc`.
 
+
 ## License
 
 [agpl3](https://github.com/ventor-tech/odoo-backup-db-cli/blob/master/LICENSE)
+
 
 ## Credits
 
