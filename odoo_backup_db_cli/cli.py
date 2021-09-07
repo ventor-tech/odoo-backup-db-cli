@@ -4,7 +4,6 @@
 # Stdlib:
 import configparser
 import importlib
-import logging
 import os
 import sys
 
@@ -17,9 +16,9 @@ from odoo_backup_db_cli.utils import (  # noqa: WPS235
     DEFAULT_ENVIRONMENT,
     DEFAULT_FILESTORE_PATH,
     CodeError,
+    color_error_msg,
     print_error_dir,
-    write_config_file,
-    color_error_msg
+    write_config_file
 )
 from yaspin import yaspin
 
@@ -210,10 +209,10 @@ def update_config(
         'with_db': with_db,
         'filestore_location': filestore_location,
     }
-    self.env = {}
+    config[environment] = {}
     for key, value in env.items():  # noqa: WPS110
         if value is not None:
-            self.env[key] = str(value)
+            config[environment][key] = str(value)
     return sys.exit(write_config_file(config, path))
 
 
@@ -237,7 +236,7 @@ def create_backup(environment, save_type, path):
     if not os.path.isfile(path):
         sys.exit(
             color_error_msg(
-                'The configuration file {} does not exist.'.format(path)
+                'The configuration file {0} does not exist.'.format(path)
             )
         )
 
@@ -255,18 +254,18 @@ def create_backup(environment, save_type, path):
             '{env}BackupHandler'.format(env=save_type.capitalize())
         )
     except ModuleNotFoundError:
-        sys.exit('Plugin for {} if not implemented yet.')
-    handler = plugin(config, environment)
+        sys.exit('Plugin for {0} if not implemented yet.'.format(save_type))
+    bk_handler = plugin(config, environment)
 
     try:
-        handler.check_config()
-    except Exception as e:
-        sys.exit(color_error_msg(e))
+        bk_handler.check_config()
+    except Exception as exp:
+        sys.exit(color_error_msg(exp))
 
     if config[environment].get('with_db'):
         dump_db(config, environment)
     if config[environment].get('with_filestore'):
         dump_filestore(config, environment)
 
-    handler.run()
+    bk_handler.run()
     sys.exit(0)

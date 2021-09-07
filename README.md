@@ -67,7 +67,7 @@ With the config above you can run different kinds of backuping:
 
 `odoo-backup-db-cli create-backup sftp1 -t sftp -p ~/.config/odoo-backup-db-cli.conf`
 
-where thw first argument is a config section, `-t` is a type of backuping, `-p` is a path to the config file
+where the first argument is a config section, `-t` is a type of backuping, `-p` is a path to the config file
 
 
 ## Examples of creating cron
