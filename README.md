@@ -7,11 +7,6 @@
 
 Tool to create full backup of odoo database and filestore
 
-**Table of contents**
-
-.. contents::
-   :local:
-
 
 ## Features
 - Support local backup, ftp/sftp protocols and AWS S3
