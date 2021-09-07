@@ -51,7 +51,7 @@ class S3BackupHandler(RemoteBackupHandler):
             self.client.upload_file(
                 self.tmp_zip,
                 self.env.get('bucket'),
-                '{}/filestore.zip'.format(subfolder),
+                '{}/filestore.zip'.format(self.subfolder),
                 Config=self.transfer_config
             )
 
