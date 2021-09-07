@@ -11,10 +11,6 @@ Tool to create full backup of odoo database and filestore
 [Installation](#installation)
 [Configuration](#configuration)
 [Example of creating cron](#examples-of-creating-cron)
-
- - [simple cron](##simple-cron)
- - [with anaconda](##with-anaconda)
-
 [License](#license)
 [Credits](#credits)
 
