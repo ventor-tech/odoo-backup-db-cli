@@ -16,7 +16,7 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         res = super(SftpBackupHandler, self)._get_required_settings()
         res.append(
             (
-                ('username', 'host', 'port', 'pasv'),
+                ('username', 'host', 'port'),
                 'The creditials for the sftp server is not fully configured.'
             )
         )
@@ -42,30 +42,30 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
 
     def _save_db(self):
         mode = 755
-        sftp.makedirs(self.backup_location, mode)
-        sftp.cwd(self.backup_location)
-        previous_folder = sftp.pwd
-        if self.subfolder not in sftp.listdir():
-            sftp.mkdir(self.subfolder, mode=mode)
-        sftp.cwd(self.subfolder)
-        sftp.put(self.tmp_dump)
+        self.sftp.makedirs(self.backup_location, mode)
+        self.sftp.cwd(self.backup_location)
+        previous_folder = self.sftp.pwd
+        if self.subfolder not in self.sftp.listdir():
+            self.sftp.mkdir(self.subfolder, mode=mode)
+        self.sftp.cwd(self.subfolder)
+        self.sftp.put(self.tmp_dump)
         os.remove(self.tmp_dump)
-        sftp.cwd(previous_folder)
+        self.sftp.cwd(previous_folder)
 
     def _save_filestore(self):
         if self.with_filestore:
-            previous_folder = sftp.pwd
-            sftp.cwd(self.subfolder)
-            sftp.put(tmp_zip)
-            os.remove(tmp_zip)
-            sftp.cwd(previous_folder)
+            previous_folder = self.sftp.pwd
+            self.sftp.cwd(self.subfolder)
+            self.sftp.put(self.tmp_zip)
+            os.remove(self.tmp_zip)
+            self.sftp.cwd(previous_folder)
 
     def _delete_old_backups(self):  # noqa: C901, WPS231
-        for folder in sftp.listdir():  # pragma: no cover - actually tested
+        for folder in self.sftp.listdir():  # pragma: no cover - actually tested
             if self._is_folder_to_remove(folder):
-                for sftp_file in sftp.listdir(folder):
-                    previous_folder = sftp.pwd
-                    sftp.cwd(folder)
-                    sftp.remove(sftp_file)
-                    sftp.cwd(previous_folder)
-                sftp.rmdir(folder)
+                for sftp_file in self.sftp.listdir(folder):
+                    previous_folder = self.sftp.pwd
+                    self.sftp.cwd(folder)
+                    self.sftp.remove(sftp_file)
+                    self.sftp.cwd(previous_folder)
+                self.sftp.rmdir(folder)

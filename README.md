@@ -5,12 +5,21 @@
 [![Documentation Status](https://readthedocs.org/projects/odoo-backup-db-cli/badge/?version=latest)](https://odoo-backup-db-cli.readthedocs.io/en/latest/?badge=latest)
 [![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
 
-Tool to create full backup of odoo database
+Tool to create full backup of odoo database and filestore
+
+[Features](##features)
+[Installation](##installation)
+[Configuration](##configuration)
+[Example of creating cron](##examples-of-creating-cron)
+ - [simple cron](###simple-cron)
+ - [with anaconda](###with-anaconda)
+
+[License](##license)
+[Credits](#credits)
 
 ## Features
-
+- Support local backup, ftp/sftp protocols and AWS S3
 - Fully typed with annotations and checked with mypy, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
-- Add yours!
 
 ## Installation
 
@@ -18,10 +27,68 @@ Tool to create full backup of odoo database
 pip install odoo-backup-db-cli
 ```
 
-## Example creating cron
+## Configuration
 
-Let's say you want to create cron each minute create backup and you have a conda environment.
+Here is a config example:
+ ```
+[common]
+db_host = localhost
+db_port = 5432
+db_username = ***
+db_password = ***
+db_name = ***
+with_db = True
+with_filestore = True
+clean_backup_after = 7
+filestore_location = /local/path/to/source/filestore/
+[s3]
+bucket = viveodoobackup
+access_key = AAAAAAAAAAAAAAA
+secret_key = aaaaaaaaaaaaaaaaaaaaaaaaaaaa
+clean_backup_after = 1
+[local1]
+backup_location = /Users/veronika/dev/test_bk/
+[local2]
+backup_location = /Users/veronika/dev/test_bk2/
+[ftp]
+backup_location = /utires/testbackup
+host = 1.111.11.111
+port = 21
+username = ftpuser
+password = ***********
+[sftp1]
+backup_location = /path/to
+host = 1.135.73.147
+port = 22
+username = sftpuser
+password = *********
+ ```
+
+With the config above you can run different kinds of backuping:
+
+`odoo-backup-db-cli create-backup local1 -t local -p ~/.config/odoo-backup-db-cli.conf`
+
+`odoo-backup-db-cli create-backup s3 -p ~/.config/odoo-backup-db-cli.conf`
+
+`odoo-backup-db-cli create-backup ftp -p ~/.config/odoo-backup-db-cli.conf`
+
+`odoo-backup-db-cli create-backup sftp1 -t sftp -p ~/.config/odoo-backup-db-cli.conf`
+
+where thw first argument is a config section, `-t` is a type of backuping, `-p` is a path to the config file
+
+
+## Examples of creating cron
+
+### Simple cron
+
+Let's say you want to create cron to backup every hour.
 Then you need:
+
+1. Type `crontab -e` and add the command:
+
+    `0 * * * * odoo-backup-db-cli create-backup s3 -p ~/.config/odoo-backup-db-cli.conf`
+
+### With anaconda
 
 1. Copy snippet appended by Anaconda in `~/.bashrc` (at the end of the file) to a separate file `~/.bashrc_conda`
 

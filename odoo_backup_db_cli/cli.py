@@ -220,13 +220,19 @@ def update_config(
 @main.command()
 @click.argument('environment')
 @click.option(
+    '--save-type',
+    '-t',
+    default=False,
+    help='The method by which the backup will be saved.',
+)
+@click.option(
     '--path',
     '-p',
     default=DEFAULT_CONF_PATH,
     help='Use a specific config file',
 )
 @yaspin(text='The process of creating a backup is in progress...')
-def create_backup(environment, path):
+def create_backup(environment, save_type, path):
     """Creates a backup according to the settings of the selected environment."""
     if not os.path.isfile(path):
         sys.exit(
@@ -237,14 +243,16 @@ def create_backup(environment, path):
 
     config = configparser.ConfigParser(default_section='common', allow_no_value=True)
     config.read(path)
+    if not save_type:
+        save_type = environment
     try:
         plugin = getattr(
             importlib.import_module(
                 'odoo_backup_db_cli.protocols.{env}'.format(
-                    env=environment
+                    env=save_type
                 )
             ),
-            '{env}BackupHandler'.format(env=environment.capitalize())
+            '{env}BackupHandler'.format(env=save_type.capitalize())
         )
     except ModuleNotFoundError:
         sys.exit('Plugin for {} if not implemented yet.')
