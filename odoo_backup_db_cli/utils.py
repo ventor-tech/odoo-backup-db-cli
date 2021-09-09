@@ -56,5 +56,7 @@ def write_config_file(config, path):
     else:
         return CodeError.SUCCESS
 
+
 def color_error_msg(msg):
-    return '\033[91m{}\033[0m'.format(msg)
+    """Formates an error message using a color."""
+    return '\033[91m{0}\033[0m'.format(msg)

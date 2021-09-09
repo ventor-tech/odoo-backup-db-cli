@@ -6,10 +6,11 @@ import ftplib  # noqa: S402
 import os
 
 # Thirdparty:
-from odoo_backup_db_cli.protocols.common import RemoteBackupHandler, FSBackupHandler
+from odoo_backup_db_cli.protocols.common import FSBackupHandler, RemoteBackupHandler
 
 
 class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
+    """FTP Backup Handler"""
 
     def _get_required_settings(self):
         res = super(FtpBackupHandler, self)._get_required_settings()

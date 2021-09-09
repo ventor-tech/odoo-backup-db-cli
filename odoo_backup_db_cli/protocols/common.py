@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from datetime import datetime, timedelta
-from abc import ABC, abstractmethod
 import tempfile
+from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 
 FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
 class BackupHandler(ABC):
+    """BackupHandler"""
 
     def __init__(self, config, env):
         self.config = config

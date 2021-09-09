@@ -18,7 +18,7 @@ from odoo_backup_db_cli.utils import (  # noqa: WPS235
     CodeError,
     color_error_msg,
     print_error_dir,
-    write_config_file
+    write_config_file,
 )
 from yaspin import yaspin
 
