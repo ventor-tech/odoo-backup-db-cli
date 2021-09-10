@@ -231,7 +231,7 @@ def update_config(
     help='Use a specific config file',
 )
 @yaspin(text='The process of creating a backup is in progress...')
-def create_backup(environment, save_type, path):
+def create_backup(environment, save_type, path):  # noqa: C901,WPS213
     """Creates a backup according to the settings of the selected environment."""
     if not os.path.isfile(path):
         sys.exit(

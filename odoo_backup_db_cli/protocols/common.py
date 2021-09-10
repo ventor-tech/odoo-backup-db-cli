@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
-class BackupHandler(ABC):
-    """BackupHandler"""
+class BackupHandler(ABC):  # noqa: WPS230,WPS214
+    """BackupHandler."""
 
     def __init__(self, config, env):
         self.config = config
@@ -22,20 +22,18 @@ class BackupHandler(ABC):
         self.tmp_zip = '{0}/filestore.zip'.format(tempfile.gettempdir())
         self.subfolder = datetime.now().strftime(FORMAT_TIME)
 
-    def _get_required_settings(self):
-        return [
-            ('clean_backup_after', 'The settings do not indicate where to save the backup.')
-        ]
+    def check_config(self):  # noqa: C901,WPS231
+        """ Checks config in an instance.
 
-    def check_config(self):
+        """
         if not self.env:
-            raise Exception('Not found [{}] config section'.format(self.protocol))
+            raise Exception('Not found [{0}] config section'.format(self.protocol))
 
-        for name, info in self._get_required_settings():
-            options = name if type(name) is tuple else (name,)
+        for name, information in self._get_required_settings():
+            options = name if isinstance(name, tuple) else (name,)
             for opt_name in options:
                 if self.env.get(opt_name) is None:
-                    raise Exception('Not found {}. {}'.format(opt_name, info))
+                    raise Exception('Not found {0}. {1}'.format(opt_name, information))
 
         if self.with_filestore and not self.env.get('filestore_location'):
             raise Exception(
@@ -44,24 +42,32 @@ class BackupHandler(ABC):
             )
 
         if self.with_db:
-            for opt_name in ['db_port', 'db_username', 'db_password', 'db_host', 'db_name']:
+            opt_names = ['db_port', 'db_username', 'db_password', 'db_host', 'db_name']
+            for opt_name in opt_names:
                 if self.env.get(opt_name) is None:
                     raise Exception(
-                        'Not found {}. '
+                        'Not found {0}. '
                         'The creditials of the database is not fully configured.'.format(opt_name)
                     )
 
-    @abstractmethod
-    def _save_db(self):
-        pass
+    def run(self):
+        """Run the action.
 
-    @abstractmethod
-    def _save_filestore(self):
-        pass
+        """
+        if self.with_db:
+            self._save_db()
+        if self.with_filestore:
+            self._save_filestore()
+        self._delete_old_backups()
 
     @abstractmethod
     def _delete_old_backups(self):
         pass
+
+    def _get_required_settings(self):
+        return [
+            ('clean_backup_after', 'The settings do not indicate where to save the backup.')
+        ]
 
     def _is_folder_to_remove(self, folder):
         try:
@@ -74,31 +80,35 @@ class BackupHandler(ABC):
 
         return True
 
-    def run(self):
-        if self.with_db:
-            self._save_db()
-        if self.with_filestore:
-            self._save_filestore()
-        self._delete_old_backups()
+    @abstractmethod
+    def _save_db(self):
+        pass
+
+    @abstractmethod
+    def _save_filestore(self):
+        pass
 
 
 class RemoteBackupHandler(BackupHandler):
-    '''
-        for ftp, sftp, s3 protocols
-    '''
+    """For ftp, sftp, s3 protocols.
+
+    """
 
     def run(self):
+        """Run the action.
+
+        """
         self._connect()
         try:
-            super(RemoteBackupHandler, self).run()
+            super().run()
         finally:
             self._disconnect()
 
 
 class FSBackupHandler(BackupHandler):
-    '''
-        (File System type) for local, ftp, sftp protocols
-    '''
+    """(File System type) for local, ftp, sftp protocols.
+
+    """
 
     def __init__(self, config, env):
         super(FSBackupHandler, self).__init__(config, env)

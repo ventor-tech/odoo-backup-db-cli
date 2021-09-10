@@ -2,19 +2,17 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 # Stdlib:
-import os
 import boto3
-from datetime import datetime, timedelta
-from boto3.s3.transfer import TransferConfig
-from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
 
-# Thirdparty:
+from boto3.s3.transfer import TransferConfig
+from datetime import datetime, timedelta
+from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
 
 
 class S3BackupHandler(RemoteBackupHandler):
 
     def _get_required_settings(self):
-        res = super(S3BackupHandler, self)._get_required_settings()
+        res = super()._get_required_settings()
         res.append((
             ('bucket', 'access_key', 'secret_key'),
             'The creditials for the Amazon S3 service is not fully configured.'
@@ -27,12 +25,14 @@ class S3BackupHandler(RemoteBackupHandler):
             aws_access_key_id=self.env.get('access_key'),
             aws_secret_access_key=self.env.get('secret_key')
         )
+        factor = 25
         self.transfer_config = TransferConfig(
-            multipart_threshold=1024*25, max_concurrency=10,
-            multipart_chunksize=1024*25, use_threads=True)
+            multipart_threshold=1024 * factor, max_concurrency=10,
+            multipart_chunksize=1024 * factor, use_threads=True,
+        )
         self.client.put_object(
             Bucket=self.env.get('bucket'),
-            Key=(self.subfolder+'/')
+            Key=(self.subfolder + '/')
         )
 
     def _disconnect(self):
@@ -42,7 +42,7 @@ class S3BackupHandler(RemoteBackupHandler):
         self.client.upload_file(
             self.tmp_dump,
             self.env.get('bucket'),
-            '{}/dump.sql.gz'.format(self.subfolder),
+            '{0}/dump.sql.gz'.format(self.subfolder),
             Config=self.transfer_config
         )
 
@@ -51,7 +51,7 @@ class S3BackupHandler(RemoteBackupHandler):
             self.client.upload_file(
                 self.tmp_zip,
                 self.env.get('bucket'),
-                '{}/filestore.zip'.format(self.subfolder),
+                '{0}/filestore.zip'.format(self.subfolder),
                 Config=self.transfer_config
             )
 
