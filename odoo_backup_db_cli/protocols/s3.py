@@ -13,6 +13,10 @@ from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
 class S3BackupHandler(RemoteBackupHandler):
     """AWS Backup Handler."""
 
+    def __init__(self):  # noqa: D107
+        super().__init__()
+        self.bucket = self.env.get('bucket')
+
     def _get_required_settings(self):
         res = super()._get_required_settings()
         res.append((
@@ -33,7 +37,7 @@ class S3BackupHandler(RemoteBackupHandler):
             multipart_chunksize=1024 * factor, use_threads=True,
         )
         self.client.put_object(
-            Bucket=self.env.get('bucket'),
+            Bucket=self.bucket,
             Key='{0}/'.format(self.subfolder)
         )
 
@@ -43,7 +47,7 @@ class S3BackupHandler(RemoteBackupHandler):
     def _save_db(self):
         self.client.upload_file(
             self.tmp_dump,
-            self.env.get('bucket'),
+            self.bucket,
             '{0}/dump.sql.gz'.format(self.subfolder),
             Config=self.transfer_config
         )
@@ -67,7 +71,7 @@ class S3BackupHandler(RemoteBackupHandler):
                 keys.append(subfolder.get('Key'))
         if keys:
             self.client.delete_objects(
-                Bucket=self.env.get('bucket'),
+                Bucket=self.bucket,
                 Delete={
                     'Objects': [{'Key': key} for key in keys],
                     'Quiet': True
