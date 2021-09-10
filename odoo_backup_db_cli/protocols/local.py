@@ -11,9 +11,7 @@ from odoo_backup_db_cli.protocols.common import FSBackupHandler
 
 
 class LocalBackupHandler(FSBackupHandler):
-    """Local Backup Handler.
-
-    """
+    """Local Backup Handler."""
 
     def _save_db(self):
         path = os.path.join(self.backup_location, self.subfolder)

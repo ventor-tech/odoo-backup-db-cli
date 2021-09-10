@@ -11,7 +11,7 @@ FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 class BackupHandler(ABC):  # noqa: WPS230,WPS214
     """BackupHandler."""
 
-    def __init__(self, config, env):
+    def __init__(self, config, env):  # noqa: D107
         self.config = config
         self.protocol = env
         self.env = env in config and config[env] or config['common']
@@ -23,17 +23,15 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
         self.subfolder = datetime.now().strftime(FORMAT_TIME)
 
     def check_config(self):  # noqa: C901,WPS231
-        """ Checks config in an instance.
-
-        """
+        """ Checks config in an instance."""
         if not self.env:
             raise Exception('Not found [{0}] config section'.format(self.protocol))
 
         for name, information in self._get_required_settings():
             options = name if isinstance(name, tuple) else (name,)
-            for opt_name in options:
-                if self.env.get(opt_name) is None:
-                    raise Exception('Not found {0}. {1}'.format(opt_name, information))
+            for option in options:
+                if self.env.get(option) is None:
+                    raise Exception('Not found {0}. {1}'.format(option, information))
 
         if self.with_filestore and not self.env.get('filestore_location'):
             raise Exception(
@@ -51,9 +49,7 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
                     )
 
     def run(self):
-        """Run the action.
-
-        """
+        """Run the action."""
         if self.with_db:
             self._save_db()
         if self.with_filestore:
@@ -62,7 +58,7 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
 
     @abstractmethod
     def _delete_old_backups(self):
-        pass
+        pass  # noqa: WPS420
 
     def _get_required_settings(self):
         return [
@@ -82,40 +78,34 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
 
     @abstractmethod
     def _save_db(self):
-        pass
+        pass  # noqa: WPS420
 
     @abstractmethod
     def _save_filestore(self):
-        pass
+        pass  # noqa: WPS420
 
 
 class RemoteBackupHandler(BackupHandler):
-    """For ftp, sftp, s3 protocols.
-
-    """
+    """For ftp, sftp, s3 protocols."""
 
     def run(self):
-        """Run the action.
-
-        """
+        """Run the action."""
         self._connect()
-        try:
+        try:  # noqa: WPS501
             super().run()
         finally:
             self._disconnect()
 
 
 class FSBackupHandler(BackupHandler):
-    """(File System type) for local, ftp, sftp protocols.
+    """(File System type) for local, ftp, sftp protocols."""
 
-    """
-
-    def __init__(self, config, env):
-        super(FSBackupHandler, self).__init__(config, env)
+    def __init__(self, config, env):  # noqa: D107
+        super().__init__(config, env)
         self.backup_location = self.env.get('backup_location')
 
     def _get_required_settings(self):
-        res = super(FSBackupHandler, self)._get_required_settings()
+        res = super()._get_required_settings()
         res.append(
             ('backup_location', 'The settings do not indicate where to save the backup.'),
         )

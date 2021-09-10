@@ -216,7 +216,7 @@ def update_config(
     return sys.exit(write_config_file(config, path))
 
 
-@main.command()
+@main.command()  # noqa: C901,WPS213
 @click.argument('environment')
 @click.option(
     '--save-type',
