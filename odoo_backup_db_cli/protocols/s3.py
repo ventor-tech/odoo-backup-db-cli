@@ -56,14 +56,14 @@ class S3BackupHandler(RemoteBackupHandler):
         if self.env.get('with_filestore') not in ('False', '0', None):
             self.client.upload_file(
                 self.tmp_zip,
-                self.env.get('bucket'),
+                self.bucket,
                 '{0}/filestore.zip'.format(self.subfolder),
                 Config=self.transfer_config
             )
 
     def _delete_old_backups(self):  # noqa: C901, WPS231
         days = self.clean_backup_after
-        folders = self.client.list_objects(Bucket=self.env.get('bucket'))
+        folders = self.client.list_objects(Bucket=self.bucket)
         keys = []
         for subfolder in folders.get('Contents'):
             delete_date = subfolder.get('LastModified').replace(tzinfo=None) + timedelta(days)
