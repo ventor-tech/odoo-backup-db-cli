@@ -2,14 +2,15 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 # Stdlib:
-import boto3
 
+import boto3
 from boto3.s3.transfer import TransferConfig
 from datetime import datetime, timedelta
 from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
 
 
 class S3BackupHandler(RemoteBackupHandler):
+    """AWS Backup Handler."""
 
     def _get_required_settings(self):
         res = super()._get_required_settings()
@@ -32,10 +33,10 @@ class S3BackupHandler(RemoteBackupHandler):
         )
         self.client.put_object(
             Bucket=self.env.get('bucket'),
-            Key=(self.subfolder + '/')
+            Key='{0}/'.format(self.subfolder)
         )
 
-    def _disconnect(self):
+    def _disconnect(self):  # noqa: WPS420
         pass
 
     def _save_db(self):

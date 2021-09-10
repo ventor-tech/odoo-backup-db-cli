@@ -7,23 +7,15 @@ import os
 
 # Thirdparty:
 import pysftp
-from odoo_backup_db_cli.protocols.common import RemoteBackupHandler, FSBackupHandler
+from odoo_backup_db_cli.protocols.common import FSBackupHandler, RemoteBackupHandler
 
 
 class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
-
-    def _get_required_settings(self):
-        res = super(SftpBackupHandler, self)._get_required_settings()
-        res.append(
-            (
-                ('username', 'host', 'port'),
-                'The creditials for the sftp server is not fully configured.'
-            )
-        )
-        return res
+    """SFTP Backup Handler."""
 
     def check_config(self):
-        super(SftpBackupHandler, self).check_config()
+        """Checks the config."""
+        super().check_config()
         if self.env.get('private_key') and self.env.get('password'):
             raise Exception('Only one of (private_key, password) '
                             'must be present in settings environment.')
@@ -37,8 +29,28 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
             private_key=self.env.get('private_key'),
         )
 
+    def _delete_old_backups(self):  # noqa: C901, WPS231
+        for folder in self.sftp.listdir():  # pragma: no cover - actually tested
+            if self._is_folder_to_remove(folder):
+                for sftp_file in self.sftp.listdir(folder):
+                    previous_folder = self.sftp.pwd
+                    self.sftp.cwd(folder)
+                    self.sftp.remove(sftp_file)
+                    self.sftp.cwd(previous_folder)
+                self.sftp.rmdir(folder)
+
     def _disconnect(self):
         self.sftp.close()
+
+    def _get_required_settings(self):
+        res = super()._get_required_settings()
+        res.append(
+            (
+                ('username', 'host', 'port'),
+                'The creditials for the sftp server is not fully configured.'
+            )
+        )
+        return res
 
     def _save_db(self):
         mode = 755
@@ -59,13 +71,3 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
             self.sftp.put(self.tmp_zip)
             os.remove(self.tmp_zip)
             self.sftp.cwd(previous_folder)
-
-    def _delete_old_backups(self):  # noqa: C901, WPS231
-        for folder in self.sftp.listdir():  # pragma: no cover - actually tested
-            if self._is_folder_to_remove(folder):
-                for sftp_file in self.sftp.listdir(folder):
-                    previous_folder = self.sftp.pwd
-                    self.sftp.cwd(folder)
-                    self.sftp.remove(sftp_file)
-                    self.sftp.cwd(previous_folder)
-                self.sftp.rmdir(folder)

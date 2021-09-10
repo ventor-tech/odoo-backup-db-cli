@@ -22,8 +22,8 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
         self.tmp_zip = '{0}/filestore.zip'.format(tempfile.gettempdir())
         self.subfolder = datetime.now().strftime(FORMAT_TIME)
 
-    def check_config(self):  # noqa: C901,WPS231
-        """ Checks config in an instance."""
+    def check_config(self):  # noqa: C901,WPS231,WPS210
+        """Checks config in an instance."""
         if not self.env:
             raise Exception('Not found [{0}] config section'.format(self.protocol))
 
