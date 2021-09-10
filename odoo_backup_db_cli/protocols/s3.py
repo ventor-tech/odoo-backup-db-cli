@@ -5,8 +5,8 @@
 
 import boto3
 from boto3.s3.transfer import TransferConfig
-from datetime import datetime, timedelta
 from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
+from datetime import datetime, timedelta
 
 
 class S3BackupHandler(RemoteBackupHandler):
@@ -36,8 +36,8 @@ class S3BackupHandler(RemoteBackupHandler):
             Key='{0}/'.format(self.subfolder)
         )
 
-    def _disconnect(self):  # noqa: WPS420
-        pass
+    def _disconnect(self):
+        pass  # noqa: WPS420
 
     def _save_db(self):
         self.client.upload_file(
