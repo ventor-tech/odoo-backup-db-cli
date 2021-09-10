@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-  noqa: WPS226
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 # Stdlib:
 
 import boto3
 from boto3.s3.transfer import TransferConfig
+from datetime import datetime, timedelta  # noqa: I001
 from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
-from datetime import datetime, timedelta
 
 
 class S3BackupHandler(RemoteBackupHandler):
