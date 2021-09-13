@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.sftp import _sftp_delete_old_backups, pysftp
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler, pysftp
 
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'listdir', side_effect=(('2020-01-01-01-01-01',),('1', '2')))
@@ -79,12 +78,12 @@ def test_try_delete_incorrect(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _sftp_delete_old_backups(config, 'test', pysftp.Connection)
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 0
     assert listdir_mock.call_count == 1
     assert cwd_mock.call_count == 0
     rmdir_mock.assert_not_called()
-    assert res == CodeError.SUCCESS
 
 
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
@@ -118,9 +117,9 @@ def test_not_delete(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _sftp_delete_old_backups(config, 'test', pysftp.Connection)
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._delete_old_backups()
     remove_mock.assert_not_called()
     listdir_mock.assert_called_once()
     rmdir_mock.assert_not_called()
     cwd_mock.assert_not_called()
-    assert res == CodeError.SUCCESS

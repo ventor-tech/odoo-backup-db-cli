@@ -7,8 +7,7 @@ import os
 import tempfile
 
 # Thirdparty:
-from odoo_backup_db_cli.protocols.local import _local_delete_old_backups
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.local import LocalBackupHandler
 
 
 def test_delete():
@@ -34,12 +33,12 @@ def test_delete():
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _local_delete_old_backups(config, 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._delete_old_backups()
     try:
         os.rmdir(os.path.dirname(path))
     except OSError:
         pass
-    assert res == CodeError.SUCCESS
 
 
 def test_try_delete_incorrect():
@@ -65,13 +64,13 @@ def test_try_delete_incorrect():
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _local_delete_old_backups(config, 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._delete_old_backups()
     try:
         os.rmdir(os.path.join(path, test_folder))
         os.rmdir(os.path.dirname(path))
     except OSError:
         pass
-    assert res == CodeError.SUCCESS
 
 
 def test_not_delete():
@@ -96,9 +95,9 @@ def test_not_delete():
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _local_delete_old_backups(config, 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._delete_old_backups()
     try:
         os.rmdir(os.path.dirname(path))
     except OSError:
         pass
-    assert res == CodeError.SUCCESS

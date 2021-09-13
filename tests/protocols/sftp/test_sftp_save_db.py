@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.sftp import _sftp_save_db, pysftp, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler, pysftp, os
 
 
 @patch.object(os, 'remove')
@@ -46,14 +45,14 @@ def test_ok_without_subfolder(
         'filestore_location': '/tmp/test',
     }
     listdir_mock.return_value = [""]
-    res = _sftp_save_db(config, 'test', pysftp.Connection, 'test')
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()
     listdir_mock.assert_called_once()
     mkdir_mock.assert_called_once()
     makedirs_mock.assert_called_once()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(os, 'remove')
@@ -92,11 +91,11 @@ def test_ok_with_subfolder(
         'filestore_location': '/tmp/test',
     }
     listdir_mock.return_value = ["test"]
-    res = _sftp_save_db(config, 'test', pysftp.Connection, 'test')
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()
     listdir_mock.assert_called_once()
     makedirs_mock.assert_called_once()
     mkdir_mock.assert_not_called()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS

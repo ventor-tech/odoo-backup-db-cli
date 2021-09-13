@@ -6,15 +6,13 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.ftp import _ftp_handler
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler
 
 
-@patch('odoo_backup_db_cli.protocols.ftp.ftplib')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_delete_old_backups')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_save_db')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_save_filestore')
-def test_ok(save_filestore_mock, save_db_mock, delete_old_backups_mock, ftplib_mock):
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._delete_old_backups')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._save_db')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler_save_filestore')
+def test_ok(save_filestore_mock, save_db_mock, delete_old_backups_mock):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -34,8 +32,12 @@ def test_ok(save_filestore_mock, save_db_mock, delete_old_backups_mock, ftplib_m
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_handler(config, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._connect()
+    ftp_backup_handler_instance._save_db()
+    ftp_backup_handler_instance._save_filestore()
+    ftp_backup_handler_instance._delete_old_backups()
+    ftp_backup_handler_instance._disconnect()
     save_filestore_mock.assert_called_once()
     save_db_mock.assert_called_once()
     delete_old_backups_mock.assert_called_once()
-    assert res == CodeError.SUCCESS

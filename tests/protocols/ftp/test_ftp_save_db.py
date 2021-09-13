@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.ftp import _ftp_save_db, ftplib, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib, os
 
 
 @patch.object(os, 'remove')
@@ -48,7 +47,8 @@ def test_ok_without_subfolder(
         'filestore_location': '/tmp/test',
     }
     nlst_mock.return_value = [""]
-    res = _ftp_save_db(config, 'test', ftplib.FTP, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._ftp_save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -57,7 +57,6 @@ def test_ok_without_subfolder(
     nlst_mock.assert_called_once()
     mkd_mock.assert_called_once()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(os, 'remove')
@@ -98,7 +97,8 @@ def test_ok_with_subfolder(
         'filestore_location': '/tmp/test',
     }
     nlst_mock.return_value = ["test"]
-    res = _ftp_save_db(config, 'test', ftplib.FTP, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._ftp_save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -107,4 +107,3 @@ def test_ok_with_subfolder(
     nlst_mock.assert_called_once()
     mkd_mock.assert_not_called()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
