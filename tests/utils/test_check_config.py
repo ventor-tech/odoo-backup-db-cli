@@ -8,9 +8,6 @@ import configparser
 from odoo_backup_db_cli.protocols.common import FSBackupHandler
 from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler
 from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler
-
-
-
 from odoo_backup_db_cli.utils import CodeError, check_config
 
 
