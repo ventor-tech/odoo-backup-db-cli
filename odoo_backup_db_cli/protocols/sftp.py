@@ -8,6 +8,7 @@ import os
 # Thirdparty:
 import pysftp
 from odoo_backup_db_cli.protocols.common import FSBackupHandler, RemoteBackupHandler
+from odoo_backup_db_cli.utils import CodeError
 
 
 class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
@@ -17,6 +18,7 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         """Checks the config."""
         super().check_config()
         if self.env.get('private_key') and self.env.get('password'):
+            self.code_error = CodeError.INVALID_SETTINGS
             raise Exception('Only one of (private_key, password) '
                             'must be present in settings environment.')
 

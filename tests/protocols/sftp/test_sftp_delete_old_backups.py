@@ -39,12 +39,12 @@ def test_delete(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _sftp_delete_old_backups(config, 'test', pysftp.Connection)
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 2
     assert listdir_mock.call_count == 2
     assert cwd_mock.call_count == 4
     rmdir_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')

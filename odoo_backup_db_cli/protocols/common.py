@@ -5,6 +5,9 @@ import tempfile
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 
+
+from odoo_backup_db_cli.utils import CodeError
+
 FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
@@ -21,19 +24,23 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
         self.tmp_dump = '{0}/dump.sql.gz'.format(tempfile.gettempdir())
         self.tmp_zip = '{0}/filestore.zip'.format(tempfile.gettempdir())
         self.subfolder = datetime.now().strftime(FORMAT_TIME)
+        self.code_error = CodeError.SUCCESS
 
     def check_config(self):  # noqa: C901,WPS231,WPS210
         """Checks config in an instance."""
         if not self.env:
+            self.code_error = CodeError.NO_SETTINGS
             raise Exception('Not found [{0}] config section'.format(self.protocol))
 
         for name, information in self._get_required_settings():
             options = name if isinstance(name, tuple) else (name,)
             for option in options:
                 if self.env.get(option) is None:
+                    self.code_error = CodeError.NO_SETTINGS
                     raise Exception('Not found {0}. {1}'.format(option, information))
 
         if self.with_filestore and not self.env.get('filestore_location'):
+            self.code_error = CodeError.NO_SETTINGS
             raise Exception(
                 'Not found filestore_location. '
                 'The settings do not indicate where to exist the filestore.'
@@ -43,6 +50,7 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
             opt_names = ['db_port', 'db_username', 'db_password', 'db_host', 'db_name']
             for opt_name in opt_names:
                 if self.env.get(opt_name) is None:
+                    self.code_error = CodeError.NO_SETTINGS
                     raise Exception(
                         'Not found {0}. '
                         'The creditials of the database is not fully configured.'.format(opt_name)
