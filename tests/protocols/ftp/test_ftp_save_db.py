@@ -16,7 +16,7 @@ from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib, os
 @patch.object(ftplib.FTP, 'storbinary')
 @patch.object(ftplib.FTP, 'cwd')
 @patch('odoo_backup_db_cli.protocols.ftp.open')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_mk_dirs')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._ftp_mk_dirs')
 def test_ok_without_subfolder(
     ftp_mk_dirs_mock,
     open_mock,
@@ -48,7 +48,8 @@ def test_ok_without_subfolder(
     }
     nlst_mock.return_value = [""]
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._ftp_save_db()
+    ftp_backup_handler_instance._connect()
+    ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -66,7 +67,7 @@ def test_ok_without_subfolder(
 @patch.object(ftplib.FTP, 'storbinary')
 @patch.object(ftplib.FTP, 'cwd')
 @patch('odoo_backup_db_cli.protocols.ftp.open')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_mk_dirs')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._ftp_mk_dirs')
 def test_ok_with_subfolder(
     ftp_mk_dirs_mock,
     open_mock,
@@ -98,7 +99,8 @@ def test_ok_with_subfolder(
     }
     nlst_mock.return_value = ["test"]
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._ftp_save_db()
+    ftp_backup_handler_instance._connect()
+    ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2

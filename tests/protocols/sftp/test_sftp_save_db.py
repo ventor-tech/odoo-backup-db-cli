@@ -46,6 +46,7 @@ def test_ok_without_subfolder(
     }
     listdir_mock.return_value = [""]
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()
@@ -92,6 +93,7 @@ def test_ok_with_subfolder(
     }
     listdir_mock.return_value = ["test"]
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()

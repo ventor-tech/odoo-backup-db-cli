@@ -11,7 +11,7 @@ from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler
 
 @patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._delete_old_backups')
 @patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._save_db')
-@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler_save_filestore')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._save_filestore')
 def test_ok(save_filestore_mock, save_db_mock, delete_old_backups_mock):
     config = configparser.ConfigParser()
     config['test'] = {

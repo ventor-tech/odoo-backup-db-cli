@@ -40,6 +40,7 @@ def test_delete(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 2
     assert listdir_mock.call_count == 2
@@ -79,6 +80,7 @@ def test_try_delete_incorrect(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 0
     assert listdir_mock.call_count == 1
@@ -118,6 +120,7 @@ def test_not_delete(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     remove_mock.assert_not_called()
     listdir_mock.assert_called_once()
