@@ -39,7 +39,6 @@ def test_with_filestore(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
-    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_filestore()
     assert cwd_mock.call_count == 2
     put_mock.assert_called_once()
@@ -76,7 +75,6 @@ def test_without_filestore(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
-    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_filestore()
     cwd_mock.assert_not_called()
     put_mock.assert_not_called()

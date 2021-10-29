@@ -48,7 +48,6 @@ def test_ok_without_subfolder(
     }
     nlst_mock.return_value = [""]
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
@@ -99,7 +98,6 @@ def test_ok_with_subfolder(
     }
     nlst_mock.return_value = ["test"]
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()

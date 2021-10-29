@@ -33,11 +33,9 @@ def test_ok(save_filestore_mock, save_db_mock, delete_old_backups_mock):
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._save_db()
     ftp_backup_handler_instance._save_filestore()
     ftp_backup_handler_instance._delete_old_backups()
-    ftp_backup_handler_instance._disconnect()
     save_filestore_mock.assert_called_once()
     save_db_mock.assert_called_once()
     delete_old_backups_mock.assert_called_once()

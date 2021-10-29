@@ -4,6 +4,7 @@
 # Stdlib:
 import configparser
 import importlib
+import logging
 import os
 import sys
 
@@ -47,7 +48,8 @@ def main():
 def generate_common_config(host, port, username, password, path):
     """Generates the common structure of the settings file."""
     if os.path.isfile(path):
-        sys.exit(color_error_msg('The configuration file already exist.'))
+        logging.info(color_error_msg('The configuration file already exist.'))
+        return sys.exit(CodeError.FILE_ALREADY_EXIST)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     config = configparser.ConfigParser()
     dir_path = os.path.dirname(path)
@@ -268,4 +270,4 @@ def create_backup(environment, save_type, path):  # noqa: C901,WPS213
         dump_filestore(config, environment)
 
     bk_handler.run()
-    sys.exit(0)
+    return sys.exit(CodeError.SUCCESS)

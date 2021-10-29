@@ -49,7 +49,6 @@ def test_ok(sendcmd_mock, mkd_mock, cmd_mock):
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._ftp_mk_dirs(path)
     sendcmd_mock.assert_called_once()
     mkd_mock.assert_called_once()
@@ -78,5 +77,4 @@ def test_empty():
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._ftp_mk_dirs(path)

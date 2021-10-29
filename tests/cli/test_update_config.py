@@ -91,7 +91,7 @@ def test_ok():
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    assert res.exit_code == 0
+    assert res.exit_code == CodeError.SUCCESS
     assert config[DEFAULT_ENVIRONMENT] == expected_config_common
     assert config['test'] == expected_config_test
 

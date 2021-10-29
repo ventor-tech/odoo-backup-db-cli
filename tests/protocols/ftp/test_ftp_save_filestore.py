@@ -41,7 +41,6 @@ def test_with_filestore(
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._save_filestore()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -82,7 +81,6 @@ def test_without_filestore(
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._save_filestore()
     open_mock.assert_not_called()
     cwd_mock.assert_not_called()

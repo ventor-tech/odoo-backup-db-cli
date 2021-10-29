@@ -72,12 +72,12 @@ def test_clean_backup_after():
     except Exception:
         pass  # noqa: WPS420
         # Do nothing
-    assert backup_instance.code_error == CodeError.SUCCESS
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_clean_backup_after_is_integer():
     config = get_test_config()
-    config['test']['clean_backup_after'] = "1.1"
+    config['test']['clean_backup_after'] = '1'
     backup_instance = LocalBackupHandler(config, 'test')
     try:
         backup_instance.check_config()

@@ -37,7 +37,6 @@ def test_delete(
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._delete_old_backups()
     assert delete_mock.call_count == 2
     assert nlst_mock.call_count == 2
@@ -72,7 +71,6 @@ def test_try_delete_incorrect(
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._delete_old_backups()
     assert delete_mock.call_count == 0
     assert nlst_mock.call_count == 1
@@ -107,7 +105,6 @@ def test_not_delete(
         'filestore_location': '/tmp/test',
     }
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
-    ftp_backup_handler_instance._connect()
     ftp_backup_handler_instance._delete_old_backups()
     delete_mock.assert_not_called()
     nlst_mock.assert_called_once()

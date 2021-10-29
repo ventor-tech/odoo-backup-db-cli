@@ -22,6 +22,11 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
             raise Exception('Only one of (private_key, password) '
                             'must be present in settings environment.')
 
+        if not self.env.get('private_key') and not self.env.get('password'):
+            self.code_error = CodeError.NO_SETTINGS
+            raise Exception('Private_key or Password '
+                            'must be present in settings environment.')
+
     def _connect(self):
         self.sftp = pysftp.Connection(
             self.env.get('host'),
@@ -40,6 +45,7 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
                     self.sftp.remove(sftp_file)
                     self.sftp.cwd(previous_folder)
                 self.sftp.rmdir(folder)
+        return CodeError.SUCCESS
 
     def _disconnect(self):
         self.sftp.close()
@@ -65,6 +71,7 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         self.sftp.put(self.tmp_dump)
         os.remove(self.tmp_dump)
         self.sftp.cwd(previous_folder)
+        return CodeError.SUCCESS
 
     def _save_filestore(self):
         if self.with_filestore:
@@ -73,3 +80,4 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
             self.sftp.put(self.tmp_zip)
             os.remove(self.tmp_zip)
             self.sftp.cwd(previous_folder)
+        return CodeError.SUCCESS

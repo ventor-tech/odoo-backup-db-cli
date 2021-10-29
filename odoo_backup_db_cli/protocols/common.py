@@ -63,6 +63,7 @@ class BackupHandler(ABC):  # noqa: WPS230,WPS214
         if self.with_filestore:
             self._save_filestore()
         self._delete_old_backups()
+        return CodeError.SUCCESS
 
     @abstractmethod
     def _delete_old_backups(self):

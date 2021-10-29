@@ -7,6 +7,7 @@ import os
 
 # Thirdparty:
 from odoo_backup_db_cli.protocols.common import FSBackupHandler, RemoteBackupHandler
+from odoo_backup_db_cli.utils import CodeError
 
 
 class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
@@ -16,7 +17,7 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         res = super()._get_required_settings()
         res.append(
             (
-                ('username', 'password', 'host', 'port'),
+                ('username', 'password', 'host', 'port', 'pasv'),
                 'The creditials for the ftp server is not fully configured.'
             )
         )
@@ -47,6 +48,7 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
                 self.ftp.mkd(current_dir)
                 self.ftp.sendcmd('SITE CHMOD 755 {0}'.format(current_dir))
                 self.ftp.cwd(current_dir)
+        return CodeError.SUCCESS
 
     def _save_db(self):
         self._ftp_mk_dirs(self.backup_location)
@@ -58,6 +60,7 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
             self.ftp.storbinary('STOR dump.sql.gz', dump)
         os.remove(self.tmp_dump)
         self.ftp.cwd(previous_folder)
+        return CodeError.SUCCESS
 
     def _save_filestore(self):
         if self.with_filestore:
@@ -67,6 +70,7 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
                 self.ftp.storbinary('STOR filestore.zip', filestore)
             os.remove(self.tmp_zip)
             self.ftp.cwd(previous_folder)
+        return CodeError.SUCCESS
 
     def _delete_old_backups(self):  # noqa: C901, WPS231
         for folder in self.ftp.nlst():  # pragma: no cover - actually tested
@@ -74,3 +78,4 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
                 for ftp_file in list(self.ftp.nlst(folder)):
                     self.ftp.delete(ftp_file)
                 self.ftp.rmd(folder)
+        return CodeError.SUCCESS

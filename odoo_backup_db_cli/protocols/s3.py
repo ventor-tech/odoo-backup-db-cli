@@ -8,6 +8,7 @@ import boto3
 from boto3.s3.transfer import TransferConfig
 from datetime import datetime, timedelta  # noqa: I001
 from odoo_backup_db_cli.protocols.common import RemoteBackupHandler
+from odoo_backup_db_cli.utils import CodeError
 
 
 class S3BackupHandler(RemoteBackupHandler):
@@ -51,6 +52,7 @@ class S3BackupHandler(RemoteBackupHandler):
             '{0}/dump.sql.gz'.format(self.subfolder),
             Config=self.transfer_config
         )
+        return CodeError.SUCCESS
 
     def _save_filestore(self):
         if self.env.get('with_filestore') not in ('False', '0', None):
@@ -60,6 +62,7 @@ class S3BackupHandler(RemoteBackupHandler):
                 '{0}/filestore.zip'.format(self.subfolder),
                 Config=self.transfer_config
             )
+        return CodeError.SUCCESS
 
     def _delete_old_backups(self):  # noqa: C901, WPS231
         days = self.clean_backup_after
@@ -77,3 +80,4 @@ class S3BackupHandler(RemoteBackupHandler):
                     'Quiet': True
                 }
             )
+        return CodeError.SUCCESS
