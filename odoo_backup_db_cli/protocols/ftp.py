@@ -17,7 +17,6 @@ class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         super(FtpBackupHandler, self).__init__(*args, **kwargs)
         self.ftp = ftplib.FTP()  # noqa: S321
 
-
     def _get_required_settings(self):
         res = super()._get_required_settings()
         res.append(
