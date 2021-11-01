@@ -13,18 +13,22 @@ from odoo_backup_db_cli.utils import CodeError
 class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
     """FTP Backup Handler."""
 
+    def __init__(self, *args, **kwargs):
+        super(FtpBackupHandler, self).__init__(*args, **kwargs)
+        self.ftp = ftplib.FTP()  # noqa: S321
+
+
     def _get_required_settings(self):
         res = super()._get_required_settings()
         res.append(
             (
                 ('username', 'password', 'host', 'port', 'pasv'),
-                'The creditials for the ftp server is not fully configured.'
+                'The credentials for the ftp server is not fully configured.'
             )
         )
         return res
 
     def _connect(self):
-        self.ftp = ftplib.FTP()  # noqa: S321
         self.ftp.connect(
             self.env.get('host'),
             int(self.env.get('port'))

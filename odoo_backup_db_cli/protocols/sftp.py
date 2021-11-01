@@ -54,8 +54,8 @@ class SftpBackupHandler(RemoteBackupHandler, FSBackupHandler):
         res = super()._get_required_settings()
         res.append(
             (
-                ('username', 'host', 'port'),
-                'The creditials for the sftp server is not fully configured.'
+                ('username', 'host', 'port', 'pasv'),
+                'The credentials for the ftp server is not fully configured.'
             )
         )
         return res

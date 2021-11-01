@@ -24,7 +24,7 @@ def get_test_config():
         'db_port': '5434',
         'db_username': 'odoo2',
         'db_password': '1234',
-        'type': 'local',
+        # 'type': 'local',
         'host': '0.1.2.3',
         'port': '5435',
         'pasv': 'True',
@@ -35,6 +35,7 @@ def get_test_config():
         'clean_backup_after': '12',
         'db_name': 'test',
         'with_filestore': 'True',
+        'with_db': 'True',
         'filestore_location': '/tmp/test',
     }
     return config

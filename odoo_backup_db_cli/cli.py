@@ -190,7 +190,10 @@ def update_config(
     ATTENTION: will overwrite the environment if it exist.
     """
     if not os.path.isfile(path):
-        sys.exit(color_error_msg('The configuration file does not exist.'))
+        logging.info(
+            color_error_msg('The configuration file does not exist.')
+        )
+        sys.exit(CodeError.FILE_DOES_NOT_EXIST)
     config = configparser.ConfigParser()
     config.read(path)
     env = {
@@ -215,7 +218,9 @@ def update_config(
     for key, value in env.items():  # noqa: WPS110
         if value is not None:
             config[environment][key] = str(value)
-    return sys.exit(write_config_file(config, path))
+
+    write_config_file(config, path)
+    return sys.exit(CodeError.SUCCESS)
 
 
 @main.command()  # noqa: C901,WPS213
@@ -236,16 +241,15 @@ def update_config(
 def create_backup(environment, save_type, path):  # noqa: C901,WPS213
     """Creates a backup according to the settings of the selected environment."""
     if not os.path.isfile(path):
-        sys.exit(
-            color_error_msg(
-                'The configuration file {0} does not exist.'.format(path)
-            )
+        logging.info(
+            'The configuration file {0} does not exist.'.format(path)
         )
+        return sys.exit(CodeError.FILE_DOES_NOT_EXIST)
 
     config = configparser.ConfigParser(default_section='common', allow_no_value=True)
     config.read(path)
     if not save_type:
-        save_type = environment
+        save_type = 'local' if environment == 'test' else environment
     try:
         plugin = getattr(
             importlib.import_module(
@@ -262,7 +266,8 @@ def create_backup(environment, save_type, path):  # noqa: C901,WPS213
     try:
         bk_handler.check_config()
     except Exception as exp:
-        sys.exit(color_error_msg(exp))
+        logging.info(color_error_msg(exp))
+        return sys.exit(CodeError.NO_SETTINGS)
 
     if config[environment].get('with_db'):
         dump_db(config, environment)
