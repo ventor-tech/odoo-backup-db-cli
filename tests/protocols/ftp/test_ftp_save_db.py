@@ -3,10 +3,13 @@
 
 # Stdlib:
 import configparser
+from datetime import datetime
 
 # Thirdparty:
 from mock import patch
 from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib, os
+
+FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
 @patch.object(os, 'remove')
@@ -96,7 +99,7 @@ def test_ok_with_subfolder(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    nlst_mock.return_value = ["test"]
+    nlst_mock.return_value = [datetime.now().strftime(FORMAT_TIME)]
     ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
     ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()

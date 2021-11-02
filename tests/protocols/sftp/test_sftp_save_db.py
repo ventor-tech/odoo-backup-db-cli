@@ -3,12 +3,17 @@
 
 # Stdlib:
 import configparser
+from datetime import datetime
 
 # Thirdparty:
 from mock import patch
 from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler, pysftp, os
 
+FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
+
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch.object(os, 'remove')
 @patch.object(pysftp.Connection, 'makedirs')
 @patch.object(pysftp.Connection, 'mkdir')
@@ -24,7 +29,9 @@ def test_ok_without_subfolder(
     mkdir_mock,
     makedirs_mock,
     remove_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -46,6 +53,7 @@ def test_ok_without_subfolder(
     }
     listdir_mock.return_value = [""]
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()
@@ -55,6 +63,8 @@ def test_ok_without_subfolder(
     remove_mock.assert_called_once()
 
 
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch.object(os, 'remove')
 @patch.object(pysftp.Connection, 'makedirs')
 @patch.object(pysftp.Connection, 'mkdir')
@@ -70,7 +80,9 @@ def test_ok_with_subfolder(
     mkdir_mock,
     makedirs_mock,
     remove_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -90,8 +102,9 @@ def test_ok_with_subfolder(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    listdir_mock.return_value = ["test"]
+    listdir_mock.return_value = [datetime.now().strftime(FORMAT_TIME)]
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._save_db()
     assert cwd_mock.call_count == 3
     put_mock.assert_called_once()

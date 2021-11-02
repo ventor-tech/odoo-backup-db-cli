@@ -8,6 +8,9 @@ import configparser
 from mock import patch
 from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler, pysftp
 
+
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'listdir', side_effect=(('2020-01-01-01-01-01',),('1', '2')))
 @patch.object(pysftp.Connection, 'cwd')
@@ -19,7 +22,9 @@ def test_delete(
     cwd_mock,
     listdir_mock,
     pwd_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -40,6 +45,7 @@ def test_delete(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 2
     assert listdir_mock.call_count == 2
@@ -47,6 +53,8 @@ def test_delete(
     rmdir_mock.assert_called_once()
 
 
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'listdir', side_effect=(('2020',),('1', '2')))
 @patch.object(pysftp.Connection, 'cwd')
@@ -58,7 +66,9 @@ def test_try_delete_incorrect(
     cwd_mock,
     listdir_mock,
     pwd_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -79,6 +89,7 @@ def test_try_delete_incorrect(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     assert remove_mock.call_count == 0
     assert listdir_mock.call_count == 1
@@ -86,6 +97,8 @@ def test_try_delete_incorrect(
     rmdir_mock.assert_not_called()
 
 
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'listdir', side_effect=((),('1', '2')))
 @patch.object(pysftp.Connection, 'cwd')
@@ -97,7 +110,9 @@ def test_not_delete(
     cwd_mock,
     listdir_mock,
     pwd_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -118,6 +133,7 @@ def test_not_delete(
         'filestore_location': '/tmp/test',
     }
     sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
     sftp_backup_handler_instance._delete_old_backups()
     remove_mock.assert_not_called()
     listdir_mock.assert_called_once()
