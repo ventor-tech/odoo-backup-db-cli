@@ -6,10 +6,11 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.sftp import _sftp_save_filestore, pysftp, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler, pysftp, os
 
 
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch.object(os, 'remove')
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'put')
@@ -19,7 +20,9 @@ def test_with_filestore(
     put_mock,
     pwd_mock,
     remove_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -39,13 +42,16 @@ def test_with_filestore(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _sftp_save_filestore(config, 'test', pysftp.Connection, 'test')
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
+    sftp_backup_handler_instance._save_filestore()
     assert cwd_mock.call_count == 2
     put_mock.assert_called_once()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
+@patch.object(pysftp.CnOpts, 'get_hostkey')
+@patch('pysftp.paramiko.Transport')
 @patch.object(os, 'remove')
 @patch('odoo_backup_db_cli.protocols.sftp.pysftp.Connection.pwd')
 @patch.object(pysftp.Connection, 'put')
@@ -55,7 +61,9 @@ def test_without_filestore(
     put_mock,
     pwd_mock,
     remove_mock,
-    ):
+    hostkey_mock,
+    transport_mock
+):
     config = configparser.ConfigParser()
     config['test'] = {
         'db_host': '0.0.0.0',
@@ -75,8 +83,9 @@ def test_without_filestore(
         'with_filestore': 'False',
         'filestore_location': '/tmp/test',
     }
-    res = _sftp_save_filestore(config, 'test', pysftp.Connection, 'test')
+    sftp_backup_handler_instance = SftpBackupHandler(config, 'test')
+    sftp_backup_handler_instance._connect()
+    sftp_backup_handler_instance._save_filestore()
     cwd_mock.assert_not_called()
     put_mock.assert_not_called()
     remove_mock.assert_not_called()
-    assert res == CodeError.SUCCESS

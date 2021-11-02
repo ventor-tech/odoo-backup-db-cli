@@ -5,7 +5,10 @@
 import configparser
 
 # Thirdparty:
-from odoo_backup_db_cli.utils import CodeError, check_config
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler
+from odoo_backup_db_cli.protocols.local import LocalBackupHandler
+from odoo_backup_db_cli.protocols.sftp import SftpBackupHandler
+from odoo_backup_db_cli.utils import CodeError
 
 
 def get_test_config():
@@ -21,7 +24,7 @@ def get_test_config():
         'db_port': '5434',
         'db_username': 'odoo2',
         'db_password': '1234',
-        'type': 'local',
+        # 'type': 'local',
         'host': '0.1.2.3',
         'port': '5435',
         'pasv': 'True',
@@ -32,6 +35,7 @@ def get_test_config():
         'clean_backup_after': '12',
         'db_name': 'test',
         'with_filestore': 'True',
+        'with_db': 'True',
         'filestore_location': '/tmp/test',
     }
     return config
@@ -39,88 +43,122 @@ def get_test_config():
 
 def test_env():
     config = get_test_config()
-    res = check_config(config, 'test2')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = LocalBackupHandler(config, 'test2')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_backup_location():
     config = get_test_config()
     del config['test']['backup_location']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_clean_backup_after():
     config = get_test_config()
     del config['test']['clean_backup_after']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_clean_backup_after_is_integer():
     config = get_test_config()
-    config['test']['clean_backup_after'] = "1.1"
-    res = check_config(config, 'test')
-    assert res == CodeError.INVALID_SETTINGS
+    config['test']['clean_backup_after'] = '1'
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.SUCCESS
 
 
 def test_with_filestore():
     config = get_test_config()
     del config['test']['with_filestore']
-    res = check_config(config, 'test')
-    assert res == CodeError.SUCCESS
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.SUCCESS
 
 
 def test_filestore_location():
     config = get_test_config()
     del config['test']['filestore_location']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_all_config_fields():
     config = get_test_config()
     del config['test']['db_username']
     del config['common']['db_username']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
-
-
-def test_types_another():
-    config = get_test_config()
-    config['test']['type'] = 'test'
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
-
-
-def test_types_ftp_ok():
-    config = get_test_config()
-    config['test']['type'] = 'ftp'
-    res = check_config(config, 'test')
-    assert res == CodeError.SUCCESS
+    backup_instance = LocalBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_types_ftp():
     config = get_test_config()
-    config['test']['type'] = 'ftp'
     del config['test']['pasv']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = FtpBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_types_sftp_ok():
     config = get_test_config()
     config['test']['type'] = 'sftp'
     del config['test']['private_key']
-    res = check_config(config, 'test')
-    assert res == CodeError.SUCCESS
+    backup_instance = SftpBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.SUCCESS
 
 
 def test_types_sftp_full():
     config = get_test_config()
-    config['test']['type'] = 'sftp'
-    res = check_config(config, 'test')
-    assert res == CodeError.INVALID_SETTINGS
+    backup_instance = SftpBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.INVALID_SETTINGS
 
 
 def test_types_sftp_not_private_key_and_pasv():
@@ -128,8 +166,13 @@ def test_types_sftp_not_private_key_and_pasv():
     config['test']['type'] = 'sftp'
     del config['test']['private_key']
     del config['test']['pasv']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = SftpBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS
 
 
 def test_types_sftp_not_private_key_and_password():
@@ -137,5 +180,10 @@ def test_types_sftp_not_private_key_and_password():
     config['test']['type'] = 'sftp'
     del config['test']['private_key']
     del config['test']['password']
-    res = check_config(config, 'test')
-    assert res == CodeError.NO_SETTINGS
+    backup_instance = SftpBackupHandler(config, 'test')
+    try:
+        backup_instance.check_config()
+    except Exception:
+        pass  # noqa: WPS420
+        # Do nothing
+    assert backup_instance.code_error == CodeError.NO_SETTINGS

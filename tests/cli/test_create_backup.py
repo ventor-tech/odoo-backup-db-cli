@@ -36,6 +36,7 @@ def test_ok(dump_db_mock, dump_filestore_mock, import_module_mock):
         'backup_location': '/tmp/test',
         'clean_backup_after': '12',
         'db_name': 'test',
+        'with_db': 'True',
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }

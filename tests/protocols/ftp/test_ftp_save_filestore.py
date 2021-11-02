@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.ftp import _ftp_save_filestore, ftplib, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib, os
 
 
 @patch.object(os, 'remove')
@@ -41,13 +40,13 @@ def test_with_filestore(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_save_filestore(config, 'test', ftplib.FTP, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._save_filestore()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
     storbinary_mock.assert_called_once()
     pwd_mock.assert_called_once()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(os, 'remove')
@@ -81,10 +80,10 @@ def test_without_filestore(
         'with_filestore': 'False',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_save_filestore(config, 'test', ftplib.FTP, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._save_filestore()
     open_mock.assert_not_called()
     cwd_mock.assert_not_called()
     storbinary_mock.assert_not_called()
     pwd_mock.assert_not_called()
     remove_mock.assert_not_called()
-    assert res == CodeError.SUCCESS

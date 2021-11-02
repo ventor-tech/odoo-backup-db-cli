@@ -39,8 +39,6 @@ def test_ok():
         'odoo2',
         '-w',
         '1234',
-        '-t',
-        'sftp',
         '-r',
         '5435',
         '-s',
@@ -58,6 +56,9 @@ def test_ok():
         '-d',
         'test',
         '-F',
+        'True',
+        '-D',
+        'True',
         '-f',
         '/tmp/test',
     )
@@ -79,7 +80,6 @@ def test_ok():
         'db_port': '5434',
         'db_username': 'odoo2',
         'db_password': '1234',
-        'type': 'sftp',
         'port': '5435',
         'pasv': 'True',
         'username': 'kek',
@@ -89,9 +89,10 @@ def test_ok():
         'clean_backup_after': '12',
         'db_name': 'test',
         'with_filestore': 'True',
+        'with_db': 'True',
         'filestore_location': '/tmp/test',
     }
-    assert res.exit_code == 0
+    assert res.exit_code == CodeError.SUCCESS
     assert config[DEFAULT_ENVIRONMENT] == expected_config_common
     assert config['test'] == expected_config_test
 
@@ -113,8 +114,6 @@ def test_check_exist_config():
         'odoo2',
         '-w',
         '1234',
-        '-t',
-        'sftp',
         '-H',
         '0.1.2.3',
         '-r',
@@ -134,6 +133,7 @@ def test_check_exist_config():
         '-d',
         'test',
         '-F',
+        'True',
         '-f',
         '/tmp/test',
     )

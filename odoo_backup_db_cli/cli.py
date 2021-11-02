@@ -16,9 +16,8 @@ from odoo_backup_db_cli.utils import (  # noqa: WPS235
     DEFAULT_CONF_PATH,
     DEFAULT_ENVIRONMENT,
     DEFAULT_FILESTORE_PATH,
-    TYPES,
     CodeError,
-    check_config,
+    color_error_msg,
     print_error_dir,
     write_config_file,
 )
@@ -49,7 +48,7 @@ def main():
 def generate_common_config(host, port, username, password, path):
     """Generates the common structure of the settings file."""
     if os.path.isfile(path):
-        logging.info('The configuration file already exist.')
+        logging.info(color_error_msg('The configuration file already exist.'))
         return sys.exit(CodeError.FILE_ALREADY_EXIST)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     config = configparser.ConfigParser()
@@ -83,13 +82,6 @@ def generate_common_config(host, port, username, password, path):
 @click.option('--db-username', '-u', help='Database username.')
 @click.option('--db-password', '-w', help='Database user password.')
 @click.option(
-    '--type',
-    '-t',
-    type=click.Choice(TYPES, case_sensitive=False),
-    default=TYPES[0],
-    help='The method by which the backup will be saved.',
-)
-@click.option(
     '--host',
     '-H',
     help='The server IP to which you want to save backups.',
@@ -113,6 +105,21 @@ def generate_common_config(host, port, username, password, path):
     help='The private key of the server user to which you want to save backups.',
 )
 @click.option(
+    '--bucket',
+    '-B',
+    help='The Amazon S3 bucket name to which you want to save backups.',
+)
+@click.option(
+    '--access-key',
+    '-A',
+    help='The AWS access key.',
+)
+@click.option(
+    '--secret-key',
+    '-S',
+    help='The AWS secret key.',
+)
+@click.option(
     '--backup-location',
     '-b',
     default=DEFAULT_BACKUPS_PATH,
@@ -131,10 +138,16 @@ def generate_common_config(host, port, username, password, path):
     help='The name of the database that will be backed up.',
 )
 @click.option(
-    '--with-filestore/--without-filestore',
+    '--with-filestore',
     '-F',
     default=False,
-    help='If true, then in addition to the database, it will make a backup for a filestore.',
+    help='If true, then it will make a backup for a filestore.',
+)
+@click.option(
+    '--with-db',
+    '-D',
+    default=False,
+    help='If true, then it will make a backup of the database.',
 )
 @click.option(
     '--filestore-location',
@@ -154,17 +167,20 @@ def update_config(
     db_port,
     db_username,
     db_password,
-    type,
     host,
     port,
     pasv,
     username,
     password,
     private_key,
+    bucket,
+    access_key,
+    secret_key,
     backup_location,
     clean_backup_after,
     db_name,
     with_filestore,
+    with_db,
     filestore_location,
     path,
 ):
@@ -174,8 +190,10 @@ def update_config(
     ATTENTION: will overwrite the environment if it exist.
     """
     if not os.path.isfile(path):
-        logging.info('The configuration file does not exist.')
-        return sys.exit(CodeError.FILE_DOES_NOT_EXIST)
+        logging.info(
+            color_error_msg('The configuration file does not exist.')
+        )
+        sys.exit(CodeError.FILE_DOES_NOT_EXIST)
     config = configparser.ConfigParser()
     config.read(path)
     env = {
@@ -183,7 +201,6 @@ def update_config(
         'db_port': db_port,
         'db_username': db_username,
         'db_password': db_password,
-        'type': type,
         'host': host,
         'port': port,
         'pasv': pasv,
@@ -194,17 +211,26 @@ def update_config(
         'clean_backup_after': clean_backup_after,
         'db_name': db_name,
         'with_filestore': with_filestore,
+        'with_db': with_db,
         'filestore_location': filestore_location,
     }
     config[environment] = {}
     for key, value in env.items():  # noqa: WPS110
         if value is not None:
             config[environment][key] = str(value)
-    return sys.exit(write_config_file(config, path))
+
+    write_config_file(config, path)
+    return sys.exit(CodeError.SUCCESS)
 
 
-@main.command()
+@main.command()  # noqa: C901,WPS213
 @click.argument('environment')
+@click.option(
+    '--save-type',
+    '-t',
+    default=False,
+    help='The method by which the backup will be saved.',
+)
 @click.option(
     '--path',
     '-p',
@@ -212,20 +238,41 @@ def update_config(
     help='Use a specific config file',
 )
 @yaspin(text='The process of creating a backup is in progress...')
-def create_backup(environment, path):
+def create_backup(environment, save_type, path):  # noqa: C901,WPS213
     """Creates a backup according to the settings of the selected environment."""
     if not os.path.isfile(path):
-        logging.info('The configuration file does not exist.')
+        logging.info(
+            'The configuration file {0} does not exist.'.format(path)
+        )
         return sys.exit(CodeError.FILE_DOES_NOT_EXIST)
-    config = configparser.ConfigParser()
+
+    config = configparser.ConfigParser(default_section='common', allow_no_value=True)
     config.read(path)
-    error_found = check_config(config, environment)
-    if error_found:
-        return sys.exit(error_found)
-    dump_db(config, environment)
-    dump_filestore(config, environment)
-    type = config[environment].get('type')
-    plugin = importlib.import_module('odoo_backup_db_cli.protocols.{type}'.format(type=type))
-    type_handler = getattr(plugin, '_{type}_handler'.format(type=type))
-    type_handler(config, environment)
+    if not save_type:
+        save_type = 'local' if environment == 'test' else environment
+    try:
+        plugin = getattr(
+            importlib.import_module(
+                'odoo_backup_db_cli.protocols.{env}'.format(
+                    env=save_type
+                )
+            ),
+            '{env}BackupHandler'.format(env=save_type.capitalize())
+        )
+    except ModuleNotFoundError:
+        sys.exit('Plugin for {0} if not implemented yet.'.format(save_type))
+    bk_handler = plugin(config, environment)
+
+    try:
+        bk_handler.check_config()
+    except Exception as exp:
+        logging.info(color_error_msg(exp))
+        return sys.exit(CodeError.NO_SETTINGS)
+
+    if config[environment].get('with_db'):
+        dump_db(config, environment)
+    if config[environment].get('with_filestore'):
+        dump_filestore(config, environment)
+
+    bk_handler.run()
     return sys.exit(CodeError.SUCCESS)

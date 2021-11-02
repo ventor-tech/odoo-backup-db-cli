@@ -3,11 +3,13 @@
 
 # Stdlib:
 import configparser
+from datetime import datetime
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.ftp import _ftp_save_db, ftplib, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib, os
+
+FORMAT_TIME = '%Y-%m-%d-%H-%M-%S'
 
 
 @patch.object(os, 'remove')
@@ -17,7 +19,7 @@ from odoo_backup_db_cli.utils import CodeError
 @patch.object(ftplib.FTP, 'storbinary')
 @patch.object(ftplib.FTP, 'cwd')
 @patch('odoo_backup_db_cli.protocols.ftp.open')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_mk_dirs')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._ftp_mk_dirs')
 def test_ok_without_subfolder(
     ftp_mk_dirs_mock,
     open_mock,
@@ -48,7 +50,8 @@ def test_ok_without_subfolder(
         'filestore_location': '/tmp/test',
     }
     nlst_mock.return_value = [""]
-    res = _ftp_save_db(config, 'test', ftplib.FTP, 'test')
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -57,7 +60,6 @@ def test_ok_without_subfolder(
     nlst_mock.assert_called_once()
     mkd_mock.assert_called_once()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(os, 'remove')
@@ -67,7 +69,7 @@ def test_ok_without_subfolder(
 @patch.object(ftplib.FTP, 'storbinary')
 @patch.object(ftplib.FTP, 'cwd')
 @patch('odoo_backup_db_cli.protocols.ftp.open')
-@patch('odoo_backup_db_cli.protocols.ftp._ftp_mk_dirs')
+@patch('odoo_backup_db_cli.protocols.ftp.FtpBackupHandler._ftp_mk_dirs')
 def test_ok_with_subfolder(
     ftp_mk_dirs_mock,
     open_mock,
@@ -97,8 +99,9 @@ def test_ok_with_subfolder(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    nlst_mock.return_value = ["test"]
-    res = _ftp_save_db(config, 'test', ftplib.FTP, 'test')
+    nlst_mock.return_value = [datetime.now().strftime(FORMAT_TIME)]
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._save_db()
     ftp_mk_dirs_mock.assert_called_once()
     open_mock.assert_called_once()
     assert cwd_mock.call_count == 2
@@ -107,4 +110,3 @@ def test_ok_with_subfolder(
     nlst_mock.assert_called_once()
     mkd_mock.assert_not_called()
     remove_mock.assert_called_once()
-    assert res == CodeError.SUCCESS

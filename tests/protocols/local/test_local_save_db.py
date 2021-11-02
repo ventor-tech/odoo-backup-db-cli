@@ -6,7 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.local import _local_save_db, os
+from odoo_backup_db_cli.protocols.local import LocalBackupHandler, os
 from odoo_backup_db_cli.utils import CodeError
 
 
@@ -32,7 +32,7 @@ def test_ok(rename_mock, makedirs_mock):
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _local_save_db(config, 'test', 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._save_db()
     rename_mock.assert_called_once()
     makedirs_mock.assert_called_once()
-    assert res == CodeError.SUCCESS

@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.ftp import _ftp_delete_old_backups, ftplib
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.ftp import FtpBackupHandler, ftplib
 
 
 @patch.object(ftplib.FTP, 'nlst', side_effect=(('2020-01-01-01-01-01',),('1', '2')))
@@ -37,11 +36,11 @@ def test_delete(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_delete_old_backups(config, 'test', ftplib.FTP)
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._delete_old_backups()
     assert delete_mock.call_count == 2
     assert nlst_mock.call_count == 2
     rmd_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(ftplib.FTP, 'nlst', side_effect=(('2020',),('1', '2')))
@@ -71,11 +70,11 @@ def test_try_delete_incorrect(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_delete_old_backups(config, 'test', ftplib.FTP)
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._delete_old_backups()
     assert delete_mock.call_count == 0
     assert nlst_mock.call_count == 1
     rmd_mock.assert_not_called()
-    assert res == CodeError.SUCCESS
 
 
 @patch.object(ftplib.FTP, 'nlst', side_effect=((),('1', '2')))
@@ -105,8 +104,8 @@ def test_not_delete(
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _ftp_delete_old_backups(config, 'test', ftplib.FTP)
+    ftp_backup_handler_instance = FtpBackupHandler(config, 'test')
+    ftp_backup_handler_instance._delete_old_backups()
     delete_mock.assert_not_called()
     nlst_mock.assert_called_once()
     rmd_mock.assert_not_called()
-    assert res == CodeError.SUCCESS
