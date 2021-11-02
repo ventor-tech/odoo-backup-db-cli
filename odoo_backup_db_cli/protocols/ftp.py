@@ -10,7 +10,7 @@ from odoo_backup_db_cli.protocols.common import FSBackupHandler, RemoteBackupHan
 from odoo_backup_db_cli.utils import CodeError
 
 
-class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):  # noqa WPS214
+class FtpBackupHandler(RemoteBackupHandler, FSBackupHandler):
     """FTP Backup Handler."""
 
     def __init__(self, *args, **kwargs):  # noqa: D107

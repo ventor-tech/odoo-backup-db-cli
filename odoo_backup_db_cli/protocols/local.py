@@ -29,7 +29,6 @@ class LocalBackupHandler(FSBackupHandler):
             os.rename(self.tmp_zip, filestore_path)
         return CodeError.SUCCESS
 
-
     def _delete_old_backups(self):  # noqa: C901, WPS231
         for root, dirs, _ in os.walk(self.backup_location):
             for dir in dirs:  # pragma: no cover - actually tested
