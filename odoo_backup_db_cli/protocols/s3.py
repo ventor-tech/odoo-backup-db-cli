@@ -14,8 +14,8 @@ from odoo_backup_db_cli.utils import CodeError
 class S3BackupHandler(RemoteBackupHandler):
     """AWS Backup Handler."""
 
-    def __init__(self):  # noqa: D107
-        super().__init__()
+    def __init__(self, config, env):  # noqa: D107
+        super().__init__(config, env)
         self.bucket = self.env.get('bucket')
 
     def _get_required_settings(self):
