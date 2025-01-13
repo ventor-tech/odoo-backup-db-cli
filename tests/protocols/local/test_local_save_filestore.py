@@ -6,8 +6,7 @@ import configparser
 
 # Thirdparty:
 from mock import patch
-from odoo_backup_db_cli.protocols.local import _local_save_filestore, os
-from odoo_backup_db_cli.utils import CodeError
+from odoo_backup_db_cli.protocols.local import LocalBackupHandler, os
 
 
 @patch.object(os, 'rename')
@@ -31,9 +30,9 @@ def test_with_filestore(rename_mock):
         'with_filestore': 'True',
         'filestore_location': '/tmp/test',
     }
-    res = _local_save_filestore(config, 'test', 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._save_filestore()
     rename_mock.assert_called_once()
-    assert res == CodeError.SUCCESS
 
 @patch.object(os, 'rename')
 def test_without_filestore(rename_mock):
@@ -42,6 +41,6 @@ def test_without_filestore(rename_mock):
         'with_filestore': 'False',
         'filestore_location': '/tmp/test',
     }
-    res = _local_save_filestore(config, 'test', 'test')
+    local_backup_handler_instance = LocalBackupHandler(config, 'test')
+    local_backup_handler_instance._save_filestore()
     rename_mock.assert_not_called()
-    assert res == CodeError.SUCCESS
